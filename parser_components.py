@@ -256,8 +256,20 @@ class MinusNode(ProgramNode):
 
 
 class NotNode(ProgramNode):
-    pass
+    def get_types(self):
+        return ("bool")
 
+    def check_scopes(self):
+        global SCOPE
+        self.operand.check_scopes()
+
+    def check_types(self):
+        global SCOPE
+        if not self.match_types(self.operand.get_types()):
+            self.raise_type_mismatch_error(self.operand.get_types())
+
+    def run(self):
+        return not self.operand.run()
 
 class FactorNode(ProgramNode):
     pass
