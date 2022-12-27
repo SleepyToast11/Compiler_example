@@ -22,6 +22,7 @@ Create nodes + parse tree using grammar:
    <operand>  ::= <Loc>
                 | <bool>
    <loc>      ::= ID <loccl>
+                | GET <loccl>
    <loccl>    ::= e 
                 | [ <bool> ] <loccl>
    <bool>     ::= <join> <boolcl>
