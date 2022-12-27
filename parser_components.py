@@ -108,7 +108,7 @@ class Node:
         else:
             print(f"{' ' * indent} < {symbol} >")
         for child in self.children:
-            child.print(indent=indent+2)
+            child.print(indent+2)  #was indent = indent + 2 before, but it was interpreting wrong.
         if self.is_nonterminal:
             print(f"{' ' * indent} </ {symbol} >")
 
@@ -275,7 +275,7 @@ class NotNode(ProgramNode):
         return not self.operand.run()
 
 class FactorNode(ProgramNode):
-    pass
+
 
 
 class UnaryNode(ProgramNode):

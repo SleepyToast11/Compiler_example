@@ -16,6 +16,11 @@ Create nodes + parse tree using grammar:
                 | IF ( <bool> ) <stmt> ELSE <stmt>
                 | WHILE ( <bool> ) <stmt>
                 | <block>
+                | ROVER <command> <operandl> ;
+   <operandl> ::= e
+                | <operand> <operandl>
+   <operand>  ::= <Loc>
+                | <bool>
    <loc>      ::= ID <loccl>
    <loccl>    ::= e 
                 | [ <bool> ] <loccl>
@@ -53,6 +58,7 @@ Create nodes + parse tree using grammar:
                 | TRUE
                 | FALSE
 
+
 """
 import enum
 import sys
@@ -65,7 +71,7 @@ from parser_components import (
     NotNode,
     Token,
     UnaryNode,
-    Vocab,
+    Vocab
 )
 
 
@@ -437,7 +443,7 @@ def Stmt():
 def Stmts():
     current = Node(NonTerminals.STMTS)
     if match_cases(
-        Vocab.CLOSE_BRACE, # More concise to start with Follow(<stmts>)
+        Vocab.CLOSE_BRACE# More concise to start with Follow(<stmts>)
     ):
         pass
     else:
