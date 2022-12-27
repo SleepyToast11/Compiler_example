@@ -536,6 +536,48 @@ def get_parse_tree(file_content):
 
     return Program()
 
+#distinguish local from global variable
+
+def distinguish_local_global_vars(parse_tree, symbol_table):
+    # Initialize the symbol table with the global variables
+    symbol_table = set(symbol_table)
+    
+    # Traverse the parse tree
+    for node in parse_tree:
+        if isinstance(node, Node):
+            # If the node is a declaration, add the variable to the symbol table
+            if node.nonterminal == NonTerminals.decl:
+                symbol_table.add(node.children[1].value)
+            elif node.nonterminal == NonTerminals.loc:
+                # If the node is a location, check if it is in the symbol table
+                if node.children[0].value in symbol_table:
+                    print(f"{node.children[0].value} is a local variable")
+                else:
+                    print(f"{node.children[0].value} is a global variable")
+            # Recursively traverse the children of the node
+            distinguish_local_global_vars(node.children, symbol_table)
+
+# allow sub/super-typing by disgning a hiearchy
+
+def is_compatible(t1, t2):
+    # Define the type hierarchy
+    type_hierarchy = {
+        "int": ["double"],
+        "double": [],
+        "char": [],
+        "bool": [],
+    }
+    
+    # Check if t1 is a supertype of t2
+    if t2 in type_hierarchy[t1]:
+        return True
+    # Check if t2 is a supertype of t1
+    elif t1 in type_hierarchy[t2]:
+        return True
+    # If neither t1 nor t2 are supertypes of the other, they are not compatible
+    return False
+
+
 
 if __name__=="__main__":
     if len(sys.argv) < 2:
