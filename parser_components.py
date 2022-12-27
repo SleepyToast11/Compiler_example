@@ -40,6 +40,9 @@ class Vocab(enum.Enum):
     DIV = "/"
     BASIC = "basic"
     SEMICOLON = ";"
+    DOT = "."
+    ROVER = "rover"
+    INFO = "info"
 
 
 class NonTerminals(enum.Enum):
