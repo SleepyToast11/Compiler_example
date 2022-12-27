@@ -3,6 +3,70 @@ import sys
 
 
 
+"""
+Create nodes + parse tree using grammar:
+
+   <program>  ::= <block>
+   <block>    ::= { <decls> <stmts> }
+   <decls>    ::= e 
+                | <decl> <decls>
+   <decl>     ::= <type> ID ;
+   <type>     ::= BASIC <typecl>
+   <typecl>   ::= e 
+                | [ NUM ] <typecl>
+   <stmts>    ::= e 
+                | <stmt> <stmts>
+   <stmt>     ::= <loc> = <bool> ;
+                | IF ( <bool> ) <stmt>
+                | IF ( <bool> ) <stmt> ELSE <stmt>
+                | WHILE ( <bool> ) <stmt>
+                | <block>
+                | ROVER <command> <operandl> ;
+   <operandl> ::= e
+                | <operand> <operandl>
+   <operand>  ::= <Loc>
+                | <bool>
+   <loc>      ::= ID <loccl>
+   <loccl>    ::= e 
+                | [ <bool> ] <loccl>
+   <bool>     ::= <join> <boolcl>
+   <boolcl>   ::= e 
+                | || <join> <boolcl>
+   <join>     ::= <equality> <joincl>
+   <joincl>   ::= e 
+                | && <equality> <joincl>
+   <equality> ::= <rel> <equalcl>
+   <equalcl>  ::= e 
+                | == <rel> <equalcl> 
+                | != <rel> <equalcl>
+   <rel>      ::= <expr> <reltail>
+   <reltail>  ::= e 
+                | <= <expr>
+                | >= <expr>
+                | > <expr>
+                | < <expr>
+   <expr>     ::= <term> <exprcl>
+   <exprcl>   ::= e
+                | + <term> <exprcl>
+                | - <term> <exprcl>
+   <term>     ::= <unary> <termcl>
+   <termcl>   ::= e
+                | * <unary> <termcl>
+                | / <unary> <termcl>
+   <unary>    ::= ! <unary>
+                | - <unary>
+                | <factor>
+   <factor>   ::= ( <bool> )
+                | <loc>
+                | NUM
+                | REAL
+                | TRUE
+                | FALSE
+
+
+"""
+import enum
+
 #   The parser works by chaining inside if statements verifications and tree building. We translate
 #   the rules by creating a node and passing it to a common verifier (this is the one from the super class)
 #   . Then the node is parsed inside the verifier and the return value is used to determine if the node is attached
