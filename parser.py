@@ -16,7 +16,11 @@ Create nodes + parse tree using grammar:
                 | IF ( <bool> ) <stmt> ELSE <stmt>
                 | WHILE ( <bool> ) <stmt>
                 | <block>
-                | ROVER <command> <bool> ;
+                | ROVER <command>;
+   <command>  ::= <token> <operandl>
+   <operandl> ::= e
+                | <operand> <operandl>
+   <operand>  ::= <bool>
    <loc>      ::= ID <loccl>
    <loccl>    ::= e 
                 | [ <bool> ] <loccl>
