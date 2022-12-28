@@ -61,7 +61,7 @@ class Robot:
     if self.map[self.x][self.y] == 'D':
       self.map[self.x] = self.map[self.x][:self.y] + ' ' + self.map[self.x][self.y+1:]
     else:
-      print("you can't dig here")
+        print("you can't dig here")
   
   def info(self):
     for row in map:
@@ -96,10 +96,18 @@ class Robot:
       return canTurn
     
   def set_ground(self):
+      found=False
+      i=0
+      for i in range(len(ground_memo)):
+          if [self.x,self.y]==ground_memo[i]:
+              found=True
+      if found==False:
+          print("ground set at :" )
+          print([self.x,self.y])
+          ground_memo.append([self.x,self.y])
+      else:
+          print("it's already been set")
       
-      print("ground set at :" )
-      print([self.x,self.y])
-      ground_memo.append([self.x,self.y])
       return ground_memo
 
   def get_ground(self):
@@ -122,6 +130,7 @@ robot.move_right()
 #robot.move_backward()
 robot.set_ground()
 robot.move_right()
+robot.dig()
 robot.set_ground()
 robot.get_ground()
 
