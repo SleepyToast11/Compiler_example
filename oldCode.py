@@ -79,6 +79,68 @@ Create nodes + parse tree using grammar:
 
 cursor = 0
 
+def go_right():
+    pass
+
+
+def go_up():
+    pass
+
+
+def go_left():
+    pass
+
+
+def go_down():
+    pass
+
+
+def can_go_down():
+    pass
+
+
+def can_go_left():
+    pass
+
+
+def can_go_up():
+    pass
+
+
+def can_go_right():
+    pass
+
+
+def get_ground():
+    pass
+
+
+def dig():
+    pass
+
+
+def set_ground():
+    pass
+
+
+GLOBAL_SCOPE = {
+    "null": {"value": 0}
+    , "operand": {"value": 0}
+    , "goRight": {"value": go_right()}
+    , "goUp": {"value": go_up()}
+    , "goLeft": {"value": go_left()}
+    , "goDown": {"value": go_down()}
+    , "canGoRight": {"value": can_go_right()}
+    , "canGoUp": {"value": can_go_up()}
+    , "canGoLeft": {"value": can_go_left()}
+    , "canGoDown": {"value": can_go_down()}
+    , "getGround": {"value": get_ground()}
+    , "setGround": {"value": set_ground()}
+    , "dig": {"value": dig()}
+    , "turnRight": {"value"}
+}
+
+
 def convert(code):
     array = code.split()
     return array
@@ -87,18 +149,7 @@ def parseExeption(string):
     print("parse error at: " + str(cursor) + " where is " + code[cursor] + " expecting " + string)
 
 
-def printNode(node, array):
-    print()
-    if node is not None:
-        array.insert(0, node.name())
-        for i in array:
-            if i is not None:
-                print(i, end=', ')
-        print()
 
-        if node.nodes is not None:
-            for i in node.nodes:
-                printNode(i, array[:])
 
 inp = open(str(sys.argv[1]))
 
@@ -109,6 +160,10 @@ code = convert(inp)
 
 class AbstractNode():
     option = None
+    def __init__(self, scope):
+        self.initial_cursor = cursor
+        self.nodes = []
+        self.scope = scope
 
 
     def run(self):
@@ -117,11 +172,19 @@ class AbstractNode():
     def get_type(self):
         return None
 
+    def set_value:
+        pass
+
     def get_value(self):
         return None
 
     def make_scope(self):
-        pass
+        for child in self.nodes:
+            child.make_scope()
+
+    def check_scope(self):
+        for child in self.nodes:
+            child.check_scope()
 
     def __init__(self, scope):
         self.initial_cursor = cursor
