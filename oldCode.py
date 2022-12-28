@@ -122,22 +122,50 @@ def dig():
 def set_ground():
     pass
 
+    """
+    rover keyword is essentially a dumb value to be used with commands to make the rover do stuff and increase 
+    code legibility ex: rover = goRight. the value assignment does basically nothing since all commands simply 
+    return None, therefore to get access to values in and out, we use the system values which are changed when 
+    calling the values
+    """
+
+
+def turn_right():
+    pass
+
+
+def turn_left():
+    pass
+
+
+def go_forward():
+    pass
+
+
+def can_go_forward():
+    pass
+
 
 GLOBAL_SCOPE = {
-    "null": {"value": 0}
-    , "operand": {"value": 0}
-    , "goRight": {"value": go_right()}
-    , "goUp": {"value": go_up()}
-    , "goLeft": {"value": go_left()}
-    , "goDown": {"value": go_down()}
-    , "canGoRight": {"value": can_go_right()}
-    , "canGoUp": {"value": can_go_up()}
-    , "canGoLeft": {"value": can_go_left()}
-    , "canGoDown": {"value": can_go_down()}
-    , "getGround": {"value": get_ground()}
-    , "setGround": {"value": set_ground()}
-    , "dig": {"value": dig()}
-    , "turnRight": {"value"}
+      "rover": {"value": None, "type": "rover"}
+    , "systemInt": {"value": 0, "type": "int"}
+    , "systemBool": {"value": False, "type": "bool"}
+    , "goRight": {"value": go_right(), "type": "rover"}
+    , "goUp": {"value": go_up(), "type": "rover"}
+    , "goLeft": {"value": go_left(), "type": "rover"}
+    , "goDown": {"value": go_down(), "type": "rover"}
+    , "canGoRight": {"value": can_go_right(), "type": "rover"}
+    , "canGoUp": {"value": can_go_up(), "type": "rover"}
+    , "canGoLeft": {"value": can_go_left(), "type": "rover"}
+    , "canGoDown": {"value": can_go_down(), "type": "rover"}
+    , "CetGround": {"value": get_ground(), "type": "rover"}
+    , "setGround": {"value": set_ground(), "type": "rover"}
+    , "dig": {"value": dig(), "type": "rover"}
+    , "turnRight": {"value": turn_right(), "type": "rover"}
+    , "turnLeft": {"value": turn_left(), "type": "rover"}
+    , "canGoForward": {"value": can_go_forward(), "type": "rover"}
+    , "goForward": {"value": go_forward(), "type": "rover"}
+    
 }
 
 
