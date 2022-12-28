@@ -626,6 +626,7 @@ class FactorNode(AbstractNode):
     types = []
 
 
+
     def name(self):
         return "Factor"
 
@@ -635,15 +636,15 @@ class FactorNode(AbstractNode):
             if self.verify_and_add_non_token_node(0, "(")\
                 and self.verify_and_add_token(1, BoolNode(self.scope))\
                 and self.verify_and_add_non_token_node(2, ")"):
-
+                        self.option = 0
                         return True
 
             elif self.reset()\
                 and self.verify_and_add_token(0, LocNode(self.scope)):
-
+                    self.option = 1
                     return True
 
-            elif self.reset():
+            elif self.reset() and self.is_type():
                     #self.nodes.append(GenericNode(code[cursor]))
 
                     self.iterate_cursor()
@@ -654,7 +655,7 @@ class FactorNode(AbstractNode):
         else:
             return False
 
-    def is_type(self, value):
+    def is_type(self):
         string = str(code[cursor])
         # checks if string is a double (python floats are double by default)
         if string.replace('.', '', 1).isdigit():
