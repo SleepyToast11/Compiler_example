@@ -59,7 +59,9 @@ class Robot:
   
   def dig(self):
     if self.map[self.x][self.y] == 'D':
-      self.map[self.x] = self.map[self.x][:self.y] + ' ' + self.map[self.x][self.y+1:]
+      print("digging.............")  
+      self.map[self.x][self.y] = 'T' 
+      print("treasure was taken")
     else:
         print("you can't dig here")
   
@@ -127,6 +129,7 @@ robot.dig()
 #robot.move_left()
 #robot.can_move_right()
 robot.move_right()
+robot.dig()
 #robot.move_backward()
 robot.set_ground()
 robot.move_right()
