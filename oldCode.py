@@ -215,10 +215,6 @@ class AbstractNode():
         for child in self.nodes:
             child.check_semantics
 
-    def check_scope(self):
-        for child in self.nodes:
-            child.check_scope()
-
     def __init__(self, scope):
         self.initial_cursor = cursor
         self.nodes = []
@@ -257,9 +253,10 @@ class AbstractNode():
             return False
 
 
-    def check_scope(self):
+    def check_scope(self, list):
         for child in self.nodes:
-            child.check_scope()
+            list = child.check_scope(list)
+        return list
 
     def parse(self):
         return True
@@ -302,6 +299,12 @@ class ProgramNode(AbstractNode):
         else:
             parseExeption("?")
 
+    def check_scope(self):
+        #there is only a block, so it doesn't matter
+        for child in self.nodes:
+            child.check_scope([])
+
+
 class GenericNode(AbstractNode):
 
     def __init__(self, scope, string):
@@ -343,6 +346,12 @@ class BlockNode(AbstractNode):
         else:
             return False
 
+    def check_scope(self, list):
+        list.appernd([])
+        super().check_scope(list)
+        list.pop()
+        return list
+
 class DeclsNode(AbstractNode):
     def name(self):
         return "Decls"
@@ -369,6 +378,9 @@ class DeclNode(AbstractNode):
         else:
             return False
 
+    def check_scope(self, list):
+        next(reversed(list)).append(self.nodes[1].get_id())
+        return list
 
 class TypeNode(AbstractNode):
 
@@ -477,17 +489,22 @@ class StmtNode(AbstractNode):
         else:
             return False
 
-
 class IDNode(AbstractNode):
+
+    value = ""
+    def get_id(self):
+        return str(self.value)
 
     def name(self):
         "ID"
+
+
 
     def parse(self):
         reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "="}
         token = code[cursor]
         if token not in reserved_symbole and not token.isdigit():
-            self.nodes.append(GenericNode(code[cursor]))
+            self.value = code[cursor]
             self.iterate_cursor()
             return True
         else:
@@ -506,6 +523,14 @@ class LocNode(AbstractNode):
                     return True
         else:
             return False
+
+    def check_scope(self, list):
+        id = self.nodes[0].get_id()
+        for arrays in list:
+            for item in arrays:
+                if id == item:
+                    return list
+        raise Exception("id not found" + self.nodes[0].get_id())
 
 class LocClNode(AbstractNode):
 
@@ -743,5 +768,3 @@ class FactorNode(AbstractNode):
 
 node = ProgramNode()
 node.parse()
-
-printNode(node, [])
