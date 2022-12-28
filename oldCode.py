@@ -1,165 +1,12 @@
 # Jerome Sparnaay, Muhi Eddin Tahhan
 import sys
+from old_code_component import (
+GLOBAL_SCOPE
+)
 
 
-
-"""
-Create nodes + parse tree using grammar:
-
-   <program>  ::= <block>
-   <block>    ::= { <decls> <stmts> }
-   <decls>    ::= e 
-                | <decl> <decls>
-   <decl>     ::= <type> ID ;
-   <type>     ::= BASIC <typecl>
-   <typecl>   ::= e 
-                | [ NUM ] <typecl>
-   <stmts>    ::= e 
-                | <stmt> <stmts>
-   <stmt>     ::= <loc> = <bool> ;
-                | IF ( <bool> ) <stmt>
-                | IF ( <bool> ) <stmt> ELSE <stmt>
-                | WHILE ( <bool> ) <stmt>
-                | <block>
-   <loc>      ::= ID <loccl>
-   <loccl>    ::= e 
-                | [ <bool> ] <loccl>
-   <bool>     ::= <join> <boolcl>
-   <boolcl>   ::= e 
-                | || <join> <boolcl>
-   <join>     ::= <equality> <joincl>
-   <joincl>   ::= e 
-                | && <equality> <joincl>
-   <equality> ::= <rel> <equalcl>
-   <equalcl>  ::= e 
-                | == <rel> <equalcl> 
-                | != <rel> <equalcl>
-   <rel>      ::= <expr> <reltail>
-   <reltail>  ::= e 
-                | <= <expr>
-                | >= <expr>
-                | > <expr>
-                | < <expr>
-   <expr>     ::= <term> <exprcl>
-   <exprcl>   ::= e
-                | + <term> <exprcl>
-                | - <term> <exprcl>
-   <term>     ::= <unary> <termcl>
-   <termcl>   ::= e
-                | * <unary> <termcl>
-                | / <unary> <termcl>
-   <unary>    ::= ! <unary>
-                | - <unary>
-                | <factor>
-   <factor>   ::= ( <bool> )
-                | <loc>
-                | NUM
-                | REAL
-                | TRUE
-                | FALSE
-
-
-"""
-
-#   The parser works by chaining inside if statements verifications and tree building. We translate
-#   the rules by creating a node and passing it to a common verifier (this is the one from the super class)
-#   . Then the node is parsed inside the verifier and the return value is used to determine if the node is attached
-#   or not to the parent tree. this happens for each node recursively and when the parser arrives at a non-token node,
-#   it verifies if the name is legal and parses moves the cursor to the next token of code. this effectively makes
-#   this whole parser just a big if statement linked together and the final value of this of programNode
-#   is if the string is pared or not. An exception error can be created, but the output is still a bit buggy.
-#   Also note, that the string to be parsed has a first pass to tokenize the string between each space,
-#   then a program root node is created and parsed. The whole parser uses global variable for the cursor and parse
-#   string for simplicity’s sake. All nodes are created from the same AbstractNode, so they have very similar functions.
 
 cursor = 0
-
-def go_right():
-    pass
-
-
-def go_up():
-    pass
-
-
-def go_left():
-    pass
-
-
-def go_down():
-    pass
-
-
-def can_go_down():
-    pass
-
-
-def can_go_left():
-    pass
-
-
-def can_go_up():
-    pass
-
-
-def can_go_right():
-    pass
-
-
-def get_ground():
-    pass
-
-
-def dig():
-    pass
-
-
-def set_ground():
-    pass
-
-def turn_right():
-    pass
-
-
-def turn_left():
-    pass
-
-
-def go_forward():
-    pass
-
-
-def can_go_forward():
-    pass
-
-
-    """
-    rover keyword is essentially a dumb value to be used with commands to make the rover do stuff and increase 
-    code legibility ex: rover = goRight. the value assignment does basically nothing since all commands simply 
-    return None, therefore to get access to values in and out, we use the system values which are changed when 
-    calling the values
-    """
-GLOBAL_SCOPE = {
-      "rover": {"value": None, "type": "rover"}
-    , "systemInt": {"value": 0, "type": "int"}
-    , "systemBool": {"value": False, "type": "bool"}
-    , "goRight": {"value": go_right(), "type": "rover"}
-    , "goUp": {"value": go_up(), "type": "rover"}
-    , "goLeft": {"value": go_left(), "type": "rover"}
-    , "goDown": {"value": go_down(), "type": "rover"}
-    , "canGoRight": {"value": can_go_right(), "type": "rover"}
-    , "canGoUp": {"value": can_go_up(), "type": "rover"}
-    , "canGoLeft": {"value": can_go_left(), "type": "rover"}
-    , "canGoDown": {"value": can_go_down(), "type": "rover"}
-    , "CetGround": {"value": get_ground(), "type": "rover"}
-    , "setGround": {"value": set_ground(), "type": "rover"}
-    , "dig": {"value": dig(), "type": "rover"}
-    , "turnRight": {"value": turn_right(), "type": "rover"}
-    , "turnLeft": {"value": turn_left(), "type": "rover"}
-    , "canGoForward": {"value": can_go_forward(), "type": "rover"}
-    , "goForward": {"value": go_forward(), "type": "rover"}
-    
-}
 
 
 def convert(code):
@@ -180,6 +27,7 @@ code = convert(inp)
 
 
 class AbstractNode():
+
     option = None
     def __init__(self, scope):
         self.initial_cursor = cursor
@@ -213,7 +61,7 @@ class AbstractNode():
 
     def check_semantics(self):
         for child in self.nodes:
-            child.check_semantics
+            child.check_semantics()
 
     def __init__(self, scope):
         self.initial_cursor = cursor
@@ -271,17 +119,20 @@ class BasicNode(AbstractNode):
 
     basic = {"int", "bool", "char", "double"}
 
-    type = ""
+
 
     def name(self):
-        return type
+        return "BasicNode"
+
+    def get_type(self):
+        return self.option
 
     def parse(self):
         token = code[cursor]
         if token in self.basic:
             # self.nodes.append(GenericNode(token))
             self.iterate_cursor()
-            self.type = token
+            self.option = token
             return True
         else:
             return False
@@ -373,7 +224,7 @@ class DeclNode(AbstractNode):
         if self.verify_and_add_token(0, TypeNode(self.scope))\
             and self.verify_and_add_token(1, IDNode(self.scope))\
             and self.verify_and_add_non_token_node(2, ";"):
-
+                self.nodes[1].set_type(self.nodes[0].get_type())
                 return True
         else:
             return False
@@ -387,44 +238,11 @@ class TypeNode(AbstractNode):
     def name(self):
         return "Type"
 
-    def parse(self):
-        if self.verify_and_add_token(0, BasicNode(self.scope))\
-            and self.verify_and_add_token(1, TypeClNode(self.scope)):
-
-                    return True
-        else:
-            return False
-
-class TypeClNode(AbstractNode):
-
-    def name(self):
-        return "TypeCl"
+    def get_type(self):
+        return self.nodes[0].get_type()
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "[")\
-            and self.verify_and_add_token(1, NumNode(self.scope))\
-            and self.verify_and_add_non_token_node(2, "]"):
-
-                    return True
-        else:
-            return None
-
-
-class NumNode(AbstractNode):
-
-    value = 0
-    def set_value(self, value):
-        self.value = value
-
-    def get_value(self):
-        return {"value": self.value, "type": "int", "bool": True}
-    def name(self):
-        return "NumNode"
-
-    def parse(self):
-        if code[cursor].isdigit():
-            self.set_value(code[cursor])
-            self.iterate_cursor()
+        if self.verify_and_add_token(0, BasicNode(self.scope)):
             return True
         else:
             return False
@@ -489,16 +307,41 @@ class StmtNode(AbstractNode):
         else:
             return False
 
+    def check_semantics(self):
+        for child in self.nodes:
+            child.check_semantics()
+        if self.option == 0:
+            if self.nodes[0].get_type() != self.nodes[2].get_type:
+                raise Exception("bad typing")
+
+        elif self.option == 1 or self.option == 2:
+            if self.nodes[2].get_type() != "bool":
+                raise Exception("bad typing")
+
+
 class IDNode(AbstractNode):
 
     value = ""
-    def get_id(self):
-        return str(self.value)
 
     def name(self):
         "ID"
 
+    def get_id(self):
+        return str(self.value)
 
+    def get_value(self):
+        return self.scope[self.get_id()]["value"]
+
+    def set_value(self, value):
+        self.scope[self.get_id()]["value"] = value
+        return self.scope
+
+    def get_type(self):
+        return self.scope[self.get_id()]["type"]
+
+    def set_type(self, type):
+        self.scope[self.get_id()] = {"redeclared": True, "type": str(type)}
+        return self.scope
 
     def parse(self):
         reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "="}
@@ -530,6 +373,11 @@ class LocNode(AbstractNode):
             for item in arrays:
                 if id == item:
                     return list
+
+        for command in GLOBAL_SCOPE:
+            if command == id:
+                return list
+
         raise Exception("id not found" + self.nodes[0].get_id())
 
 class LocClNode(AbstractNode):
@@ -554,15 +402,26 @@ class BoolNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_token(0, JoinNode(self.scope))\
-            and self.verify_and_add_non_token_node(1, "||")\
-            and self.verify_and_add_token(2, BoolNode(self.scope)):
+            and self.verify_and_add_token(2, BoolClNode(self.scope)):
+                return True
 
-                    return True
-        elif self.reset()\
-                and self.verify_and_add_token(0, JoinNode(self.scope)):
-                        return True
         else:
             return False
+
+
+class BoolClNode(AbstractNode):
+
+    def name(self):
+        return "BoolCl"
+
+    def parse(self):
+        if  self.verify_and_add_non_token_node(0, "||") \
+            and self.verify_and_add_token(1, JoinNode(self.scope)) \
+            and self.verify_and_add_token(2, BoolClNode(self.scope)):
+                return True
+
+        else:
+            return None
 
 class JoinNode(AbstractNode):
 
@@ -571,16 +430,26 @@ class JoinNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_token(0, EqualityNode(self.scope))\
-            and self.verify_and_add_non_token_node(1, "&&")\
-            and self.verify_and_add_token(2, BoolNode(self.scope)):
-
-                    return True
-        elif self.reset()\
-            and self.verify_and_add_token(0, EqualityNode(self.scope)):
-
+            and self.verify_and_add_token(1, JoinClNode(self.scope)):
                     return True
         else:
             return False
+
+class JoinClNode(AbstractNode):
+
+    def name(self):
+        return "JoinCl"
+
+    def parse(self):
+        if self.verify_and_add_non_token_node(0, "&&")\
+            and self.verify_and_add_token(1, EqualityNode(self.scope))\
+            and self.verify_and_add_token(2, JoinClNode(self.scope)):
+                return True
+
+        else:
+            return None
+
+
 
 class EqualityNode(AbstractNode):
 
@@ -603,13 +472,13 @@ class EqualityClNode(AbstractNode):
     def parse(self):
         if self.verify_and_add_non_token_node(0, "==")\
             and self.verify_and_add_token(1, EqualityClNode(self.scope)):
-
+                    self.option = "=="
                     return True
 
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "!=")\
                 and self.verify_and_add_token(1, EqualityClNode(self.scope)):
-
+                        self.option = "!="
                         return True
         else:
             return None
@@ -635,12 +504,22 @@ class RelTailNode(AbstractNode):
     def parse(self):
         if self.verify_and_add_non_token_node(0, "<")\
             and self.verify_and_add_token(1, ExprNode(self.scope)):
-
+                    self.option = "<"
                     return True
         elif self.reset()\
             and self.verify_and_add_non_token_node(0, ">")\
             and self.verify_and_add_token(1, ExprNode(self.scope)):
-
+                    self.option = ">"
+                    return True
+        elif self.reset()\
+            and self.verify_and_add_non_token_node(0, "<=")\
+            and self.verify_and_add_token(1, ExprNode(self.scope)):
+                    self.option = "<="
+                    return True
+        elif self.reset()\
+            and self.verify_and_add_non_token_node(0, ">=")\
+            and self.verify_and_add_token(1, ExprNode(self.scope)):
+                    self.option = ">="
                     return True
         else:
             return None
@@ -660,18 +539,20 @@ class ExprNode(AbstractNode):
 
 class ExprTailNode(AbstractNode):
 
+
+
     def name(self):
         return "ExprTail"
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "+")\
             and self.verify_and_add_token(1, ExprTailNode(self.scope)):
-
+                    self.operator = "+"
                     return True
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "-")\
                 and self.verify_and_add_token(1, ExprTailNode(self.scope)):
-
+                        self.operator = "-"
                         return True
         else:
             return None
@@ -690,6 +571,8 @@ class TermNode(AbstractNode):
             return False
 
 class TermTailNode(AbstractNode):
+
+
 
     def name(self):
         return "TermTail"
@@ -738,6 +621,11 @@ class FactorNode(AbstractNode):
 
     reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "="}
 
+    value = {}
+
+    types = []
+
+
     def name(self):
         return "Factor"
 
@@ -756,7 +644,8 @@ class FactorNode(AbstractNode):
                     return True
 
             elif self.reset():
-                    self.nodes.append(GenericNode(code[cursor]))
+                    #self.nodes.append(GenericNode(code[cursor]))
+
                     self.iterate_cursor()
 
                     return True
@@ -764,6 +653,16 @@ class FactorNode(AbstractNode):
                 return False
         else:
             return False
+
+    def is_type(self, value):
+        string = str(code[cursor])
+        # checks if string is a double (python floats are double by default)
+        if string.replace('.', '', 1).isdigit():
+            self.types.append("double")
+        if string.isdigit():
+            self.types.append("int")
+        if string == "true" or string == "false":
+            self.types.append("bool")
 
 
 node = ProgramNode()
