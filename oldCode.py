@@ -21,11 +21,6 @@ Create nodes + parse tree using grammar:
                 | IF ( <bool> ) <stmt> ELSE <stmt>
                 | WHILE ( <bool> ) <stmt>
                 | <block>
-                | ROVER <command>;
-   <command>  ::= TOKENCOMMAND <operandl>
-   <operandl> ::= e
-                | <operand> <operandl>
-   <operand>  ::= <bool>
    <loc>      ::= ID <loccl>
    <loccl>    ::= e 
                 | [ <bool> ] <loccl>
@@ -122,14 +117,6 @@ def dig():
 def set_ground():
     pass
 
-    """
-    rover keyword is essentially a dumb value to be used with commands to make the rover do stuff and increase 
-    code legibility ex: rover = goRight. the value assignment does basically nothing since all commands simply 
-    return None, therefore to get access to values in and out, we use the system values which are changed when 
-    calling the values
-    """
-
-
 def turn_right():
     pass
 
@@ -146,6 +133,12 @@ def can_go_forward():
     pass
 
 
+    """
+    rover keyword is essentially a dumb value to be used with commands to make the rover do stuff and increase 
+    code legibility ex: rover = goRight. the value assignment does basically nothing since all commands simply 
+    return None, therefore to get access to values in and out, we use the system values which are changed when 
+    calling the values
+    """
 GLOBAL_SCOPE = {
       "rover": {"value": None, "type": "rover"}
     , "systemInt": {"value": 0, "type": "int"}
@@ -193,9 +186,21 @@ class AbstractNode():
         self.nodes = []
         self.scope = scope
 
+    def end_of_token_scope(self, scope):
+        for key in self.old_scope:
+            if self.scope[key]["value"] != scope[key]["value"]:
+                self.scope[key] = scope[key]
+
 
     def run(self):
-        raise Exception("run not instantiated")
+        return None
+        """
+        this is the general idea of how this should work for most
+        for child in self.nodes:
+            new_scope = child.run()
+            self.end_of_token_scope(new_scope)
+            """
+
 
     def get_type(self):
         return None
@@ -206,9 +211,9 @@ class AbstractNode():
     def get_value(self):
         return None
 
-    def make_scope(self):
+    def check_semantics(self):
         for child in self.nodes:
-            child.make_scope()
+            child.check_semantics
 
     def check_scope(self):
         for child in self.nodes:
@@ -400,7 +405,7 @@ class NumNode(AbstractNode):
         self.value = value
 
     def get_value(self):
-        return self.value
+        return {"value": self.value, "type": "int", "bool": True}
     def name(self):
         return "NumNode"
 
