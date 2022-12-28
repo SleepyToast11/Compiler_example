@@ -60,6 +60,8 @@ class Robot:
   def dig(self):
     if self.map[self.x][self.y] == 'D':
       self.map[self.x] = self.map[self.x][:self.y] + ' ' + self.map[self.x][self.y+1:]
+    else:
+      print("you can't dig here")
   
   def info(self):
     for row in map:
