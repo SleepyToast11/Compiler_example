@@ -21,11 +21,11 @@ Create nodes + parse tree using grammar:
                 | IF ( <bool> ) <stmt> ELSE <stmt>
                 | WHILE ( <bool> ) <stmt>
                 | <block>
-                | ROVER <command> <operandl> ;
+                | ROVER <command>;
+   <command>  ::= TOKENCOMMAND <operandl>
    <operandl> ::= e
                 | <operand> <operandl>
-   <operand>  ::= <Loc>
-                | <bool>
+   <operand>  ::= <bool>
    <loc>      ::= ID <loccl>
    <loccl>    ::= e 
                 | [ <bool> ] <loccl>
@@ -65,7 +65,6 @@ Create nodes + parse tree using grammar:
 
 
 """
-import enum
 
 #   The parser works by chaining inside if statements verifications and tree building. We translate
 #   the rules by creating a node and passing it to a common verifier (this is the one from the super class)
@@ -85,7 +84,7 @@ def convert(code):
     return array
 
 def parseExeption(string):
-    print("parse error at: " + str(cursor) + " where is " + code[cursor] + " expecting "+ string)
+    print("parse error at: " + str(cursor) + " where is " + code[cursor] + " expecting " + string)
 
 
 def printNode(node, array):
@@ -112,6 +111,17 @@ class AbstractNode():
     option = None
 
 
+    def run(self):
+        raise Exception("run not instantiated")
+
+    def get_type(self):
+        return None
+
+    def get_value(self):
+        return None
+
+    def make_scope(self):
+        pass
 
     def __init__(self, scope):
         self.initial_cursor = cursor
@@ -144,7 +154,7 @@ class AbstractNode():
 
     def verify_and_add_non_token_node(self, string):
         if code[cursor] is string:
-            self.nodes.append(GenericNode(string))
+            #self.nodes.append(GenericNode(string)) removed simplify runtime interpretation
             self.iterate_cursor()
             return True
         else:
@@ -168,14 +178,17 @@ class BasicNode(AbstractNode):
 
     basic = {"int", "bool", "char", "double"}
 
+    type = ""
+
     def name(self):
-        return "BASIC"
+        return type
 
     def parse(self):
         token = code[cursor]
         if token in self.basic:
-            self.nodes.append(GenericNode(token))
+            # self.nodes.append(GenericNode(token))
             self.iterate_cursor()
+            self.type = token
             return True
         else:
             return False
@@ -192,16 +205,6 @@ class ProgramNode(AbstractNode):
 
         else:
             parseExeption("?")
-
-class NonTokenNode(AbstractNode):
-
-    def __init__(self, scope, string):
-        super().__init__(scope)
-        self.nodes.append(GenericNode(string))
-
-    def name(self):
-        return "Non-token"
-
 
 class GenericNode(AbstractNode):
 
@@ -220,15 +223,25 @@ class GenericNode(AbstractNode):
 class BlockNode(AbstractNode):
 
     def __init__(self, scope):
-        self.scope = scope.copy()
+        self.super(scope)
+        self.old_scope = scope
+        self.scope = {}
+        for key in scope:
+            self.scope[key] = scope[key]
+            self.scope[key]["redeclared"] = False
+
+    def end_of_block_scope(self):
+        for key in self.old_scope:
+            if not self.scope[key]["redeclared"]:
+                self.old_scope[key]["value"] = self.scope[key]["value"]
 
     def name(self):
         return "Block"
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "{")\
-            and self.verify_and_add_token(1, DeclsNode())\
-            and self.verify_and_add_token(2, StmtsNode())\
+            and self.verify_and_add_token(1, DeclsNode(self.scope))\
+            and self.verify_and_add_token(2, StmtsNode(self.scope))\
             and self.verify_and_add_non_token_node(3, "}"):
                 return True
         else:
@@ -239,8 +252,8 @@ class DeclsNode(AbstractNode):
         return "Decls"
 
     def parse(self):
-        if self.verify_and_add_token(0, DeclNode())\
-            and self.verify_and_add_token(1, DeclsNode()):
+        if self.verify_and_add_token(0, DeclNode(self.scope))\
+            and self.verify_and_add_token(1, DeclsNode(self.scope)):
 
                 return True
         else:
@@ -252,8 +265,8 @@ class DeclNode(AbstractNode):
         return "Decl"
 
     def parse(self):
-        if self.verify_and_add_token(0, TypeNode())\
-            and self.verify_and_add_token(1, IDNode())\
+        if self.verify_and_add_token(0, TypeNode(self.scope))\
+            and self.verify_and_add_token(1, IDNode(self.scope))\
             and self.verify_and_add_non_token_node(2, ";"):
 
                 return True
@@ -267,8 +280,8 @@ class TypeNode(AbstractNode):
         return "Type"
 
     def parse(self):
-        if self.verify_and_add_token(0, BasicNode())\
-            and self.verify_and_add_token(1, TypeClNode()):
+        if self.verify_and_add_token(0, BasicNode(self.scope))\
+            and self.verify_and_add_token(1, TypeClNode(self.scope)):
 
                     return True
         else:
@@ -281,13 +294,17 @@ class TypeClNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "[")\
-            and self.verify_and_add_token(1, GenericNode(code[cursor]))\
+            and self.verify_and_add_token(1, NumNode(self.scope))\
             and self.verify_and_add_non_token_node(2, "]"):
 
                     return True
         else:
             return None
 
+
+class NumNode(AbstractNode):
+
+    def name:
 
 class StmtsNode(AbstractNode):
 
@@ -296,8 +313,8 @@ class StmtsNode(AbstractNode):
 
     def parse(self):
         #since python uses lazy eval, this shouldnt create an infinite loop
-        if self.verify_and_add_token(0, StmtNode())\
-            and self.verify_and_add_token(1, StmtsNode()):
+        if self.verify_and_add_token(0, StmtNode(self.scope))\
+            and self.verify_and_add_token(1, StmtsNode(self.scope)):
 
             return True
         else:
@@ -310,9 +327,9 @@ class StmtNode(AbstractNode):
         return "Stmt"
 
     def parse(self):
-        if self.verify_and_add_token(0, LocNode())\
+        if self.verify_and_add_token(0, LocNode(self.scope))\
             and self.verify_and_add_non_token_node(1, "=")\
-            and self.verify_and_add_token(2, BoolNode())\
+            and self.verify_and_add_token(2, BoolNode(self.scope))\
             and self.verify_and_add_non_token_node(3, ";"):
                     self.option = 0
 
@@ -321,11 +338,11 @@ class StmtNode(AbstractNode):
         elif self.reset()\
             and self.verify_and_add_non_token_node(0, "if")\
             and self.verify_and_add_non_token_node(1, "(")\
-            and self.verify_and_add_token(2, BoolNode())\
+            and self.verify_and_add_token(2, BoolNode(self.scope))\
             and self.verify_and_add_non_token_node(3, ")")\
-            and self.verify_and_add_token(4, StmtNode())\
+            and self.verify_and_add_token(4, StmtNode(self.scope))\
             and self.verify_and_add_non_token_node(5, "else")\
-            and self.verify_and_add_token(6, StmtNode()):
+            and self.verify_and_add_token(6, StmtNode(self.scope)):
                     self.option = 1
 
                     return True
@@ -333,15 +350,15 @@ class StmtNode(AbstractNode):
         elif self.reset()\
             and self.verify_and_add_non_token_node(0, "while")\
             and self.verify_and_add_non_token_node(1, "(")\
-            and self.verify_and_add_token(2, BoolNode())\
+            and self.verify_and_add_token(2, BoolNode(self.scope))\
             and self.verify_and_add_non_token_node(3, ")")\
-            and self.verify_and_add_token(3, StmtNode()):
+            and self.verify_and_add_token(3, StmtNode(self.scope)):
                     self.option = 2
 
                     return True
 
         elif self.reset()\
-            and self.verify_and_add_token(0, BlockNode()):
+            and self.verify_and_add_token(0, BlockNode(self.scope)):
             self.option = 3
 
             return True
@@ -372,8 +389,8 @@ class LocNode(AbstractNode):
         return "Loc"
 
     def parse(self):
-        if self.verify_and_add_token(0, IDNode())\
-            and self.verify_and_add_token(1, LocClNode()):
+        if self.verify_and_add_token(0, IDNode(self.scope))\
+            and self.verify_and_add_token(1, LocClNode(self.scope)):
 
                     return True
         else:
@@ -386,9 +403,9 @@ class LocClNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "[")\
-            and self.verify_and_add_token(1, BoolNode())\
+            and self.verify_and_add_token(1, BoolNode(self.scope))\
             and self.verify_and_add_non_token_node(2, "]")\
-            and self.verify_and_add_token(3, LocClNode()):
+            and self.verify_and_add_token(3, LocClNode(self.scope)):
 
                     return True
         else:
@@ -400,13 +417,13 @@ class BoolNode(AbstractNode):
         return "Bool"
 
     def parse(self):
-        if self.verify_and_add_token(0, JoinNode())\
+        if self.verify_and_add_token(0, JoinNode(self.scope))\
             and self.verify_and_add_non_token_node(1, "||")\
-            and self.verify_and_add_token(2, BoolNode()):
+            and self.verify_and_add_token(2, BoolNode(self.scope)):
 
                     return True
         elif self.reset()\
-                and self.verify_and_add_token(0, JoinNode()):
+                and self.verify_and_add_token(0, JoinNode(self.scope)):
                         return True
         else:
             return False
@@ -417,13 +434,13 @@ class JoinNode(AbstractNode):
         return "Join"
 
     def parse(self):
-        if self.verify_and_add_token(0, EqualityNode())\
+        if self.verify_and_add_token(0, EqualityNode(self.scope))\
             and self.verify_and_add_non_token_node(1, "&&")\
-            and self.verify_and_add_token(2, BoolNode()):
+            and self.verify_and_add_token(2, BoolNode(self.scope)):
 
                     return True
         elif self.reset()\
-            and self.verify_and_add_token(0, EqualityNode()):
+            and self.verify_and_add_token(0, EqualityNode(self.scope)):
 
                     return True
         else:
@@ -435,8 +452,8 @@ class EqualityNode(AbstractNode):
         return "Equality"
 
     def parse(self):
-        if self.verify_and_add_token(0, RelNode())\
-            and self.verify_and_add_token(1, EqualityClNode()):
+        if self.verify_and_add_token(0, RelNode(self.scope))\
+            and self.verify_and_add_token(1, EqualityClNode(self.scope)):
 
                     return True
         else:
@@ -449,13 +466,13 @@ class EqualityClNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "==")\
-            and self.verify_and_add_token(1, EqualityClNode()):
+            and self.verify_and_add_token(1, EqualityClNode(self.scope)):
 
                     return True
 
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "!=")\
-                and self.verify_and_add_token(1, EqualityClNode()):
+                and self.verify_and_add_token(1, EqualityClNode(self.scope)):
 
                         return True
         else:
@@ -467,8 +484,8 @@ class RelNode(AbstractNode):
         return "Rel"
 
     def parse(self):
-        if self.verify_and_add_token(0, ExprNode())\
-            and self.verify_and_add_token(1, RelTailNode()):
+        if self.verify_and_add_token(0, ExprNode(self.scope))\
+            and self.verify_and_add_token(1, RelTailNode(self.scope)):
 
                 return True
         else:
@@ -481,12 +498,12 @@ class RelTailNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "<")\
-            and self.verify_and_add_token(1, ExprNode()):
+            and self.verify_and_add_token(1, ExprNode(self.scope)):
 
                     return True
         elif self.reset()\
             and self.verify_and_add_non_token_node(0, ">")\
-            and self.verify_and_add_token(1, ExprNode()):
+            and self.verify_and_add_token(1, ExprNode(self.scope)):
 
                     return True
         else:
@@ -498,8 +515,8 @@ class ExprNode(AbstractNode):
         return "Expr"
 
     def parse(self):
-        if self.verify_and_add_token(0, TermNode())\
-            and self.verify_and_add_token(1, ExprTailNode()):
+        if self.verify_and_add_token(0, TermNode(self.scope))\
+            and self.verify_and_add_token(1, ExprTailNode(self.scope)):
 
                     return True
         else:
@@ -512,12 +529,12 @@ class ExprTailNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "+")\
-            and self.verify_and_add_token(1, ExprTailNode()):
+            and self.verify_and_add_token(1, ExprTailNode(self.scope)):
 
                     return True
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "-")\
-                and self.verify_and_add_token(1, ExprTailNode()):
+                and self.verify_and_add_token(1, ExprTailNode(self.scope)):
 
                         return True
         else:
@@ -529,8 +546,8 @@ class TermNode(AbstractNode):
         return "Term"
 
     def parse(self):
-        if self.verify_and_add_token(0, UnaryNode())\
-            and self.verify_and_add_token(1, TermTailNode()):
+        if self.verify_and_add_token(0, UnaryNode(self.scope))\
+            and self.verify_and_add_token(1, TermTailNode(self.scope)):
 
                     return True
         else:
@@ -543,13 +560,13 @@ class TermTailNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "*")\
-            and self.verify_and_add_token(1, TermNode()):
+            and self.verify_and_add_token(1, TermNode(self.scope)):
 
                     return True
 
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "/") \
-                and self.verify_and_add_token(1, TermNode()):
+                and self.verify_and_add_token(1, TermNode(self.scope)):
 
                         return True
         else:
@@ -562,19 +579,19 @@ class UnaryNode(AbstractNode):
 
     def parse(self):
         if self.verify_and_add_non_token_node(0, "!")\
-            and self.verify_and_add_token(1, UnaryNode()):
+            and self.verify_and_add_token(1, UnaryNode(self.scope)):
 
                     return True
 
 
         elif self.reset()\
                 and self.verify_and_add_non_token_node(0, "-") \
-                and self.verify_and_add_token(1, UnaryNode()):
+                and self.verify_and_add_token(1, UnaryNode(self.scope)):
 
                     return True
 
         elif self.reset()\
-            and self.verify_and_add_token(0, FactorNode()):
+            and self.verify_and_add_token(0, FactorNode(self.scope)):
 
                     return True
         else:
@@ -592,13 +609,13 @@ class FactorNode(AbstractNode):
         token = code[cursor]
         if token not in self.reserved_symbole:
             if self.verify_and_add_non_token_node(0, "(")\
-                and self.verify_and_add_token(1, BoolNode())\
+                and self.verify_and_add_token(1, BoolNode(self.scope))\
                 and self.verify_and_add_non_token_node(2, ")"):
 
                         return True
 
             elif self.reset()\
-                and self.verify_and_add_token(0, LocNode()):
+                and self.verify_and_add_token(0, LocNode(self.scope)):
 
                     return True
 

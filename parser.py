@@ -17,7 +17,7 @@ Create nodes + parse tree using grammar:
                 | WHILE ( <bool> ) <stmt>
                 | <block>
                 | ROVER <command>;
-   <command>  ::= <token> <operandl>
+   <command>  ::= TOKENCOMMAND <operandl>
    <operandl> ::= e
                 | <operand> <operandl>
    <operand>  ::= <bool>
