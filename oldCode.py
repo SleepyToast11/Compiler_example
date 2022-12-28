@@ -172,7 +172,7 @@ class AbstractNode():
     def get_type(self):
         return None
 
-    def set_value:
+    def set_value(self):
         pass
 
     def get_value(self):
@@ -367,7 +367,22 @@ class TypeClNode(AbstractNode):
 
 class NumNode(AbstractNode):
 
-    def name:
+    value = 0
+    def set_value(self, value):
+        self.value = value
+
+    def get_value(self):
+        return self.value
+    def name(self):
+        return "NumNode"
+
+    def parse(self):
+        if code[cursor].isdigit():
+            self.set_value(code[cursor])
+            self.iterate_cursor()
+            return True
+        else:
+            return False
 
 class StmtsNode(AbstractNode):
 
