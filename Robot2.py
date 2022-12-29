@@ -6,12 +6,14 @@ Final work is in this Robot
 import random
 
 
+
 ground_memo = []
 
 class Robot:
   def __init__(self, map):
     self.map = map
     self.x, self.y = self.spawn()
+    self.orientation = 1
   
   def spawn(self):
     # Find an empty spot on the map to spawn the robot
@@ -53,6 +55,7 @@ class Robot:
     canTurn = self.can_move_right()
     if canTurn==True:
         self.x += 1
+        
     else:
         print("can't turn right")
       
@@ -68,6 +71,7 @@ class Robot:
   def info(self):
     for row in map:
         print(''.join(row))
+    print("the orientation is ", self.orientation)
     return self.x, self.y
 
   def can_move_right(self):
@@ -96,7 +100,36 @@ class Robot:
       if self.y < len(self.map[0])-1 and self.map[self.x][self.y+1] != 'X':
           canTurn = True
       return canTurn
-    
+
+  def rotate_right(self):
+      
+      if self.orientation==4:
+          self.orientaion=1
+      else:
+          self.orientaion =+ 1
+          print(self.orientaion)
+      return self.orientaion
+
+  def rotate_left(self):
+      
+      if self.orientation==1:
+          self.orientaion=4
+      else:
+          self.orientaion=-1
+      return self.orientaion
+
+  def move(self):
+      
+      if self.orientation==1:
+          self.move_forward()
+      elif self.orientation==2:
+          self.move_right()
+      elif self.orientation==3:
+          self.move_backward()
+      else:
+          self.move_left()
+      return self.orientation
+
   def set_ground(self):
       found=False
       i=0
@@ -124,18 +157,23 @@ with open('map.txt', 'r') as f:
 robot = Robot(map)
 
 print(robot.info())
-robot.dig()
+#robot.dig()
 #robot.move_forward()
 #robot.move_left()
 #robot.can_move_right()
-robot.move_right()
-robot.dig()
+#robot.move_right()
+#robot.dig()
 #robot.move_backward()
-robot.set_ground()
-robot.move_right()
-robot.dig()
-robot.set_ground()
-robot.get_ground()
+#robot.set_ground()
+#robot.move_right()
+#robot.dig()
+#robot.set_ground()
+#robot.get_ground()
+robot.rotate_right()
+robot.move()
 
+print(robot.info())
 
+robot.rotate_left()
+robot.move()
 print(robot.info())
