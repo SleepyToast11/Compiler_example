@@ -12,6 +12,7 @@ NORTH=1
 EAST=2
 SOUTH=3
 WEST=4 
+rover='R'
 
 class Robot:
 
@@ -114,9 +115,24 @@ class Robot:
         print("you can't dig here")
   
   def info(self):
+    for i in range(len(map)):
+     for j in range(len(map[i])):
+      if map[i][j] == 'R':
+        map[i][j] = ''
+    
+    map[self.x][self.y]=rover
     for row in map:
         print(''.join(row))
-    print("the orientation is ",  self.orientation)
+    print("the orientation is ")
+    if self.orientation==1:
+        print("NORTH")
+    if self.orientation==2:
+        print("EAST")
+    if self.orientation==3:
+        print("SOUTH")
+    if self.orientation==4:
+        print("WEST")
+    
     return self.x, self.y
 
   def can_move_right(self):
