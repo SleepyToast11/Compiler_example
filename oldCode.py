@@ -359,18 +359,18 @@ class LocNode(AbstractNode):
         else:
             return False
 
-    def check_scope(self, list):
+    def check_scope(self, decl_list, assign_list):
         id = self.nodes[0].get_id()
-        for arrays in list:
+        for arrays in assign_list:
             for item in arrays:
                 if id == item:
-                    return list
+                    return decl_list, assign_list
 
         for command in GLOBAL_SCOPE.keys():
             if command == id:
                 return list
 
-        raise Exception("id not found" + self.nodes[0].get_id())
+        raise Exception("id not found " + self.nodes[0].get_id())
 
 class BoolNode(AbstractNode):
 

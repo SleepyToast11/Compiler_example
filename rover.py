@@ -9,10 +9,8 @@ MAX_RUNTIME = 36000
 
 # Rovers that exist
 ROVER_1 = "Rover1"
-ROVER_2 = "Rover2"
 ROVERS = [
-    ROVER_1,
-    ROVER_2,
+    ROVER_1
 ]
 
 # Command file is stored within the rover directory. Here we're building one file
@@ -84,8 +82,7 @@ class Rover():
 def main():
     # Initialize the rovers
     rover1 = Rover(ROVER_1)
-    rover2 = Rover(ROVER_2)
-    my_rovers = [rover1, rover2]
+    my_rovers = [rover1]
 
     # Run the rovers in parallel
     procs = []

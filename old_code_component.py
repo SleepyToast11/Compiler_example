@@ -48,8 +48,6 @@ Create nodes + parse tree using grammar:
                 | REAL
                 | TRUE
                 | FALSE
-
-
 """
 
 #   The parser works by chaining inside if statements verifications and tree building. We translate
@@ -64,7 +62,8 @@ Create nodes + parse tree using grammar:
 #   string for simplicity’s sake. All nodes are created from the same AbstractNode, so they have very similar functions.
 
 
-def go_right():
+
+def go_right(rover):
     pass
 
 
@@ -150,5 +149,4 @@ GLOBAL_SCOPE = {
     , "turnLeft": {"value": turn_left(), "type": "rover"}
     , "canGoForward": {"value": can_go_forward(), "type": "rover"}
     , "goForward": {"value": go_forward(), "type": "rover"}
-
 }
