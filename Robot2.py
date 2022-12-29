@@ -8,12 +8,18 @@ import random
 
 
 ground_memo = []
+NORTH=1
+EAST=2
+SOUTH=3
+WEST=4 
 
 class Robot:
+
+  
   def __init__(self, map):
     self.map = map
     self.x, self.y = self.spawn()
-    self.orientation = 1
+    self.orientation=NORTH
   
   def spawn(self):
     # Find an empty spot on the map to spawn the robot
@@ -71,7 +77,7 @@ class Robot:
   def info(self):
     for row in map:
         print(''.join(row))
-    print("the orientation is ", self.orientation)
+    print("the orientation is ",  self.orientation)
     return self.x, self.y
 
   def can_move_right(self):
@@ -103,28 +109,33 @@ class Robot:
 
   def rotate_right(self):
       
-      if self.orientation==4:
-          self.orientaion=1
-      else:
-          self.orientaion =+ 1
-          print(self.orientaion)
-      return self.orientaion
+    if self.orientation == NORTH:
+      self.orientation = WEST
+    elif self.orientation == WEST:
+      self.orientation = SOUTH
+    elif self.orientation == SOUTH:
+      self.orientation = EAST
+    elif self.orientation == EAST:
+      self.orientation = NORTH
 
   def rotate_left(self):
       
-      if self.orientation==1:
-          self.orientaion=4
-      else:
-          self.orientaion=-1
-      return self.orientaion
+    if self.orientation == NORTH:
+      self.orientation = EAST
+    elif self.orientation == EAST:
+      self.orientation = SOUTH
+    elif self.orientation == SOUTH:
+      self.orientation = WEST
+    elif self.orientation == WEST:
+      self.orientation = NORTH
 
   def move(self):
       
-      if self.orientation==1:
+      if self.orientation==NORTH:
           self.move_forward()
-      elif self.orientation==2:
+      elif self.orientation==EAST:
           self.move_right()
-      elif self.orientation==3:
+      elif self.orientation==SOUTH:
           self.move_backward()
       else:
           self.move_left()
