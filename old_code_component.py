@@ -14,9 +14,7 @@ Create nodes + parse tree using grammar:
                 | IF ( <bool> ) <stmt> ELSE <stmt>
                 | WHILE ( <bool> ) <stmt>
                 | <block>
-   <loc>      ::= ID <loccl>
-   <loccl>    ::= e
-                | [ <bool> ] <loccl>
+   <loc>      ::= ID
    <bool>     ::= <join> <boolcl>
    <boolcl>   ::= e
                 | || <join> <boolcl>
