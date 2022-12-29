@@ -52,11 +52,13 @@ class AbstractNode():
 
     def check_semantics(self):
         for child in self.nodes:
-            child.check_semantics()
+            if child is not None:
+                child.check_semantics()
 
     def get_Ids(self, list):
         for child in self.nodes:
-            list = child.get_Ids(list)
+            if child is not None:
+                list = child.get_Ids(list)
         return list
 
     def name(self):
@@ -87,7 +89,7 @@ class AbstractNode():
 
     def verify_and_add_non_token_node(self, index, string):
         if self.get_token() is string:
-            #self.nodes.append(GenericNode(string)) removed simplify runtime interpretation
+            self.nodes.append(None)
             self.iterate_cursor()
             return True
         else:
@@ -96,7 +98,8 @@ class AbstractNode():
 
     def check_scope(self, decl_list, assign_list):
         for child in self.nodes:
-            decl_list, assign_list = child.check_scope(decl_list, assign_list)
+            if child is not None:
+                decl_list, assign_list = child.check_scope(decl_list, assign_list)
         return decl_list, assign_list
 
     def parse(self):

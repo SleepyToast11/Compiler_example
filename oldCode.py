@@ -1,105 +1,8 @@
 # Jerome Sparnaay, Muhi Eddin Tahhan
-import sys
+from Abstract_Node_OldCode import AbstractNode
 from old_code_component import (
-GLOBAL_SCOPE
+    GLOBAL_SCOPE
 )
-from Abstract_Node_OldCode import Abstract_Node
-
-
-
-cursor = 0
-CURRENT_SCOPE = {}
-
-def convert(code):
-    array = code.split()
-    return array
-
-def parseExeption(string):
-    print(" where is " + AbstractNode.get_token() + " expecting " + string)
-
-
-
-
-inp = open(str(sys.argv[1]))
-
-
-code = convert(inp)
-
-
-
-class AbstractNode():
-
-    scope = {}
-    option = None
-    def __init__(self):
-        self.initial_cursor = cursor
-        self.nodes = []
-
-    def check_childs(self, index, type, superType):
-        return self.nodes[index].get_types(superType) == type
-
-    def get_type(self, type):
-        pass
-
-    def get_child_type(self, index, type):
-        return self.nodes[index].get_type(type)
-
-# generic run function for all nodes, most will not run and be called by other methods like get val or set value
-    def run(self):
-        for child in self.nodes:
-            child.run()
-
-    def check_semantics(self):
-        for child in self.nodes:
-            child.check_semantics()
-
-    def get_Ids(self, list):
-        for child in self.nodes:
-            list = child.get_Ids(list)
-        return list
-
-    def name(self):
-        return None
-
-    def reset(self):
-        global cursor
-        cursor = self.initial_cursor
-        return True
-
-    def get_token(self):
-        return code[cursor]
-
-    def verify_and_add_token(self, index, node):
-        val = node.parse()
-        if val is None:
-            return True
-        elif val:
-            self.nodes.append(node)
-            return True
-        else:
-            return False
-
-    def iterate_cursor(self):
-        global cursor
-        cursor += 1
-        return True
-
-    def verify_and_add_non_token_node(self, index, string):
-        if self.get_token() is string:
-            #self.nodes.append(GenericNode(string)) removed simplify runtime interpretation
-            self.iterate_cursor()
-            return True
-        else:
-            return False
-
-
-    def check_scope(self, decl_list, assign_list):
-        for child in self.nodes:
-            decl_list, assign_list = child.check_scope(decl_list, assign_list)
-        return decl_list, assign_list
-
-    def parse(self):
-        return True
 
 
 class BasicNode(AbstractNode):
@@ -137,11 +40,11 @@ class ProgramNode(AbstractNode):
         return "Program"
 
     def parse(self):
-        if self.verify_and_add_token(0, BlockNode({})):
+        if self.verify_and_add_token(0, BlockNode()):
             return True
 
         else:
-            parseExeption("?")
+            raise Exception("program rejected parse")
 
 
 """class GenericNode(AbstractNode):
@@ -168,6 +71,7 @@ class BlockNode(AbstractNode):
         decl_list.pop()
         assign_list.pop()
         return decl_list, assign_list
+
     def run(self):
 
         global CURRENT_SCOPE
@@ -177,7 +81,8 @@ class BlockNode(AbstractNode):
             CURRENT_SCOPE[key]["redeclared"] = False
 
         for child in self.nodes:
-            child.run()
+            if child is not None:
+                child.run()
 
         self.end_of_block_scope()
 
@@ -208,12 +113,6 @@ class BlockNode(AbstractNode):
                 return True
         else:
             return False
-
-    def check_scope(self, list):
-        list.appernd([])
-        super().check_scope(list)
-        list.pop()
-        return list
 
 class DeclsNode(AbstractNode):
     def name(self):
@@ -251,6 +150,7 @@ class DeclNode(AbstractNode):
     def check_scope(self, decl_list, assign_list):
         next(reversed(decl_list)).append(self.nodes[1].get_id())
         return decl_list, assign_list
+
 
 class TypeNode(AbstractNode):
 
@@ -400,9 +300,9 @@ class IDNode(AbstractNode):
     value = ""
 
     def get_Ids(self, list):
-        list.appernd
+        return list.append(self.get_id())
     def name(self):
-        "ID"
+        return "ID"
 
     def get_id(self):
         return str(self.value)
@@ -506,7 +406,7 @@ class BoolNode(AbstractNode):
 class BoolClNode(AbstractNode):
 
     def get_type(self, type):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             if (type == "bool") and (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type)):
                 return "bool"
             else:
@@ -517,7 +417,7 @@ class BoolClNode(AbstractNode):
             Exception("boolCl issue")
 
     def get_value(self):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             val = self.nodes[2].get_value()
             return self.nodes[1].get_value() or val
         else:
@@ -566,22 +466,22 @@ class JoinNode(AbstractNode):
 class JoinClNode(AbstractNode):
 
     def get_type(self, type):
-        if len(self.nodes) == 2:
-            if (type == "bool") and (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type)):
+        if len(self.nodes) == 3:
+            if (type == "bool") and (self.check_childs(1, "bool", type) and self.check_childs(2, "bool", type)):
                 return "bool"
             else:
                 Exception("boolCl issue")
         elif self.check_childs(1, "bool", type):
             return "bool"
         else:
-            Exception("boolCl issue")
+            Exception("joinCl issue")
 
     def get_value(self):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             val = self.nodes[2].get_value()
-            return self.nodes[0].get_value() and val
+            return self.nodes[1].get_value() and val
         else:
-            return self.nodes[0].get_value()
+            return self.nodes[1].get_value()
 
 
     def name(self):
@@ -635,20 +535,23 @@ class EqualityNode(AbstractNode):
 class EqualityClNode(AbstractNode):
 
     def get_type(self, type):
-        if (type == "bool") and (((self.check_childs(0, "int", type) or self.check_childs(0, "double", type)) \
-                and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)))\
-                    or (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type))):
-                return "bool"
+        if len(self.nodes) == 3:
+            if (type == "bool") and (((self.check_childs(1, "int", type) or self.check_childs(1, "double", type)) \
+                    and (self.check_childs(2, "int", type) or self.check_childs(2, "double", type)))\
+                        or (self.check_childs(2, "bool", type) and self.check_childs(1, "bool", type))):
+                    return "bool"
+            else:
+                raise Exception("eaqualityCl issue")
         else:
-            self.get_child_type(0, type)
+            self.get_child_type(1, type)
 
     def get_value(self):
-        if len(self.nodes) == 2:
-            val, op = self.nodes[1].get_value()
+        if len(self.nodes) == 3:
+            val, op = self.nodes[2].get_value()
             if op == "==":
-                return self.nodes[0].get_value() == val, self.option
+                return self.nodes[1].get_value() == val, self.option
             elif op == "!=":
-                return self.nodes[0].get_value() != val, self.option
+                return self.nodes[1].get_value() != val, self.option
         else:
             return self.nodes[1].get_value(), self.option
 
@@ -788,15 +691,15 @@ class ExprTailNode(AbstractNode):
     def get_type(self, type):
         if (type == "int" or type == "double") \
                 and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
-            if len(self.nodes) == 2:
-                if not ((self.check_childs(2, "int", type) or self.check_childs(1, "double", type))):
+            if len(self.nodes) == 3:
+                if not ((self.check_childs(2, "int", type) or self.check_childs(2, "double", type))):
                     raise Exception()
             return self.get_child_type(1, type)
         else:
             raise Exception("expr tail does not agree")
 
     def get_value(self):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             val, op = self.nodes[2].get_value()
             if op == "+":
                 return self.nodes[1].get_value() + val, self.option
@@ -826,11 +729,12 @@ class ExprTailNode(AbstractNode):
 class TermNode(AbstractNode):
 
     def get_type(self, type):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             if not (self.check_childs(0, "int", type) or self.check_childs(0, "double", type)) \
                     or not ((self.check_childs(1, "int", type) or self.check_childs(1, "double", type))):
                 raise Exception("Term tail does not agree")
-        elif self.get_child_type(0, type) != bool:
+            return self.get_child_type(1, type)
+        else:
             return self.get_child_type(0, type)
     def get_value(self):
         if len(self.nodes) == 2:
@@ -856,7 +760,7 @@ class TermNode(AbstractNode):
 class TermTailNode(AbstractNode):
 
     def get_value(self):
-        if len(self.nodes) == 2:
+        if len(self.nodes) == 3:
             val, op = self.nodes[2].get_value()
             if op == "*":
                 return (val * self.nodes[1].get_value()), self.option
@@ -867,9 +771,9 @@ class TermTailNode(AbstractNode):
     def get_type(self, type):
         if (type != "int" or type != "double")\
                 and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
-            if len(self.nodes) == 2:
+            if len(self.nodes) == 3:
                 if not ((self.check_childs(2, "int", type) or self.check_childs(2, "double", type))):
-                    raise Exception()
+                    raise Exception("term tail does not agree")
             return self.get_child_type(1, type)
         else:
             raise Exception("term tail does not agree")
@@ -955,6 +859,17 @@ class FactorNode(AbstractNode):
     type = ""
 
     val = None
+
+    def get_Ids(self, list):
+        if self.option == 2:
+            list.append(True)
+            return list
+        elif self.option == 0:
+            return self.nodes[1].get_Ids(list)
+        else:
+            return self.nodes[0].get_Ids(list)
+
+
 
     def get_type(self):
         return self.type
