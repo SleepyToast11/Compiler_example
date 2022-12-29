@@ -32,7 +32,7 @@ class Robot:
         found = True
 
     # Set the robot's starting position
-    map[self.x][self.y] = 'R'
+    map[self.x][self.y] = 'S'
     return self.x,self.y
     
   
@@ -40,64 +40,76 @@ class Robot:
     canTurn = self.can_move_forward()
     if canTurn==True:
       if self.orientation==NORTH:  
-          self.y -= 1
-      elif self.orientation==EAST:
-          self.x += 1
-      elif self.orientation==SOUTH:
-          self.y += 1
-      elif self.orientation==WEST:
           self.x -= 1
+      elif self.orientation==EAST:
+          self.y += 1
+      elif self.orientation==SOUTH:
+          self.x += 1
+      elif self.orientation==WEST:
+          self.y -= 1
     else:
-        print("can't move forward")  
+        print("can't move")  
   
   def move_backward(self):
     canTurn = self.can_move_left()
     if canTurn==True:
       if self.orientation==NORTH:  
-          self.y += 1
-      elif self.orientation==EAST:
-          self.x -= 1
-      elif self.orientation==SOUTH:
-          self.y -= 1
-      elif self.orientation==WEST:
           self.x += 1
+      elif self.orientation==EAST:
+          self.y -= 1
+      elif self.orientation==SOUTH:
+          self.x -= 1
+      elif self.orientation==WEST:
+          self.y += 1
     else:
-        print("can't move forward")  
+        print("can't move")  
   
   def move_left(self):
     canTurn = self.can_move_left()
     if canTurn==True:
       if self.orientation==NORTH:  
-          self.x -= 1
-      elif self.orientation==EAST:
           self.y -= 1
+      elif self.orientation==EAST:
+          self.x -= 1
       elif self.orientation==SOUTH:
-          self.x += 1
-      elif self.orientation==WEST:
           self.y += 1
+      elif self.orientation==WEST:
+          self.x += 1
     else:
-        print("can't move forward")  
+        print("can't move")  
   
   def move_right(self):
     canTurn = self.can_move_right()
     if canTurn==True:
       if self.orientation==NORTH:  
-          self.x += 1
-      elif self.orientation==EAST:
           self.y += 1
+      elif self.orientation==EAST:
+          self.x += 1
       elif self.orientation==SOUTH:
-          self.x -= 1
-      elif self.orientation==WEST:
           self.y -= 1
+      elif self.orientation==WEST:
+          self.x -= 1
     else:
-        print("can't move forward")  
+        print("can't move")  
       
   
   def dig(self):
-    if self.map[self.x][self.y] == 'D':
+    if self.map[self.x-1][self.y] == 'D':
       print("digging.............")  
-      self.map[self.x][self.y] = 'T' 
+      self.map[self.x-1][self.y] = 'T' 
       print("treasure was taken")
+    elif self.map[self.x+1][self.y] == 'D':
+      print("digging.............")  
+      self.map[self.x+1][self.y] = 'T' 
+      print("treasure was taken")
+    elif self.map[self.x][self.y+1] == 'D':
+      print("digging.............")  
+      self.map[self.x][self.y+1] = 'T' 
+      print("treasure was taken") 
+    elif self.map[self.x][self.y-1] == 'D':
+      print("digging.............")  
+      self.map[self.x][self.y-1] = 'T' 
+      print("treasure was taken")         
     else:
         print("you can't dig here")
   
@@ -110,25 +122,25 @@ class Robot:
   def can_move_right(self):
       canTurn = False
       if self.orientation==NORTH:          
-       if self.x > 0 and self.map[self.x+1][self.y] != 'X':
+       if self.x > 0 and self.map[self.x][self.y+1] != 'X':
            canTurn = True
            print("it can move")
        else:
           print("it can't move")
       elif self.orientation==EAST:
-          if self.x > 0 and self.map[self.x][self.y+1] != 'X':
+          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
       elif self.orientation==SOUTH:
-          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+          if self.x > 0 and self.map[self.x][self.y-1] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
       elif self.orientation==WEST:
-          if self.x > 0 and self.map[self.x][self.y-1] != 'X':
+          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
               canTurn = True
               print("it can move")
           else:
@@ -138,25 +150,25 @@ class Robot:
   def can_move_left(self):
       canTurn = False
       if self.orientation==NORTH:          
-       if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+       if self.x > 0 and self.map[self.x][self.y-1] != 'X':
            canTurn = True
            print("it can move")
        else:
           print("it can't move")
       elif self.orientation==EAST:
-          if self.x > 0 and self.map[self.x][self.y-1] != 'X':
+          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
       elif self.orientation==SOUTH:
-          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
+          if self.x > 0 and self.map[self.x][self.y+1] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
       elif self.orientation==WEST:
-          if self.x > 0 and self.map[self.x][self.y+1] != 'X':
+          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
               canTurn = True
               print("it can move")
           else:
@@ -166,25 +178,25 @@ class Robot:
   def can_move_forward(self):
       canTurn = False
       if self.orientation==NORTH:          
-       if self.x > 0 and self.map[self.x][self.y-1] != 'X':
+       if self.x > 0 and self.map[self.x-1][self.y] != 'X':
            canTurn = True
            print("it can move")
        else:
           print("it can't move")
       elif self.orientation==EAST:
-          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
-              canTurn = True
-              print("it can move")
-          else:
-             print("it can't move")
-      elif self.orientation==SOUTH:
           if self.x > 0 and self.map[self.x][self.y+1] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
+      elif self.orientation==SOUTH:
+          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
+              canTurn = True
+              print("it can move")
+          else:
+             print("it can't move")
       elif self.orientation==WEST:
-          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+          if self.x > 0 and self.map[self.x][self.y-1] != 'X':
               canTurn = True
               print("it can move")
           else:
@@ -194,25 +206,25 @@ class Robot:
   def can_move_backward(self):
       canTurn = False
       if self.orientation==NORTH:          
-       if self.x > 0 and self.map[self.x][self.y+1] != 'X':
+       if self.x > 0 and self.map[self.x+1][self.y] != 'X':
            canTurn = True
            print("it can move")
        else:
           print("it can't move")
       elif self.orientation==EAST:
-          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
-              canTurn = True
-              print("it can move")
-          else:
-             print("it can't move")
-      elif self.orientation==SOUTH:
           if self.x > 0 and self.map[self.x][self.y-1] != 'X':
               canTurn = True
               print("it can move")
           else:
              print("it can't move")
+      elif self.orientation==SOUTH:
+          if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+              canTurn = True
+              print("it can move")
+          else:
+             print("it can't move")
       elif self.orientation==WEST:
-          if self.x > 0 and self.map[self.x+1][self.y] != 'X':
+          if self.x > 0 and self.map[self.x][self.y+1] != 'X':
               canTurn = True
               print("it can move")
           else:
@@ -222,24 +234,24 @@ class Robot:
   def rotate_right(self):
       
     if self.orientation == NORTH:
-      self.orientation = WEST
-    elif self.orientation == WEST:
-      self.orientation = SOUTH
-    elif self.orientation == SOUTH:
       self.orientation = EAST
-    elif self.orientation == EAST:
+    elif self.orientation == WEST:
       self.orientation = NORTH
+    elif self.orientation == SOUTH:
+      self.orientation = WEST
+    elif self.orientation == EAST:
+      self.orientation = SOUTH
 
   def rotate_left(self):
       
     if self.orientation == NORTH:
-      self.orientation = EAST
-    elif self.orientation == EAST:
-      self.orientation = SOUTH
-    elif self.orientation == SOUTH:
       self.orientation = WEST
-    elif self.orientation == WEST:
+    elif self.orientation == EAST:
       self.orientation = NORTH
+    elif self.orientation == SOUTH:
+      self.orientation = EAST
+    elif self.orientation == WEST:
+      self.orientation = SOUTH
 
 
   def set_ground(self):
