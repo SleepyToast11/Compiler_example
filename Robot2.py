@@ -5,10 +5,15 @@ Final work is in this Robot
 
 import random
 
+
+
+ground_memo = []
+
 class Robot:
   def __init__(self, map):
     self.map = map
     self.x, self.y = self.spawn()
+    self.orientation = 1
   
   def spawn(self):
     # Find an empty spot on the map to spawn the robot
@@ -26,45 +31,149 @@ class Robot:
     
   
   def move_forward(self):
-    if self.y > 0 and self.map[self.x][self.y-1] != 'X':
+    canTurn = self.can_move_forward()
+    if canTurn==True:
       self.y -= 1
-      
+    else:
+        print("can't move forward")  
   
   def move_backward(self):
-    if self.y < len(self.map[0])-1 and self.map[self.x][self.y+1] != 'X':
+     canTurn = self.can_move_left()
+     if canTurn==True:
       self.y += 1
-      
+     else:
+         print("can't move backwards") 
   
   def move_left(self):
-    if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+    canTurn = self.can_move_left()
+    if canTurn==True:
       self.x -= 1
-      
+    else:
+        print("can't turn left") 
   
   def move_right(self):
-    if self.x < len(self.map)-1 and self.map[self.x+1][self.y] != 'X':
-      self.x += 1
+    canTurn = self.can_move_right()
+    if canTurn==True:
+        self.x += 1
+        
+    else:
+        print("can't turn right")
       
   
   def dig(self):
     if self.map[self.x][self.y] == 'D':
-      self.map[self.x] = self.map[self.x][:self.y] + ' ' + self.map[self.x][self.y+1:]
+      print("digging.............")  
+      self.map[self.x][self.y] = 'T' 
+      print("treasure was taken")
+    else:
+        print("you can't dig here")
   
   def info(self):
+    for row in map:
+        print(''.join(row))
+    print("the orientation is ", self.orientation)
     return self.x, self.y
 
+  def can_move_right(self):
+      canTurn = False
+      if self.x > 0 and self.map[self.x-1][self.y] != 'X':
+          canTurn = True
+          print("it can move")
+      else:
+          print("it can't move")
+      return canTurn
+  
+  def can_move_left(self):
+      canTurn = False
+      if self.x < len(self.map)-1 and self.map[self.x+1][self.y] != 'X':
+          canTurn = True
+      return canTurn
 
+  def can_move_forward(self):
+      canTurn = False
+      if self.y > 0 and self.map[self.x][self.y-1] != 'X':
+          canTurn = True
+      return canTurn
+
+  def can_move_backward(self):
+      canTurn = False
+      if self.y < len(self.map[0])-1 and self.map[self.x][self.y+1] != 'X':
+          canTurn = True
+      return canTurn
+
+  def rotate_right(self):
+      
+      if self.orientation==4:
+          self.orientaion=1
+      else:
+          self.orientaion =+ 1
+          print(self.orientaion)
+      return self.orientaion
+
+  def rotate_left(self):
+      
+      if self.orientation==1:
+          self.orientaion=4
+      else:
+          self.orientaion=-1
+      return self.orientaion
+
+  def move(self):
+      
+      if self.orientation==1:
+          self.move_forward()
+      elif self.orientation==2:
+          self.move_right()
+      elif self.orientation==3:
+          self.move_backward()
+      else:
+          self.move_left()
+      return self.orientation
+
+  def set_ground(self):
+      found=False
+      i=0
+      for i in range(len(ground_memo)):
+          if [self.x,self.y]==ground_memo[i]:
+              found=True
+      if found==False:
+          print("ground set at :" )
+          print([self.x,self.y])
+          ground_memo.append([self.x,self.y])
+      else:
+          print("it's already been set")
+      
+      return ground_memo
+
+  def get_ground(self):
+      
+      print("ground were set at", ground_memo) 
+    
 # Read map from a text file
 with open('map.txt', 'r') as f:
   map = [list(line.strip()) for line in f]
 
 # Create a robot and collect all the treasures on the map
 robot = Robot(map)
-while any('D' in row for row in map):
-  robot.dig()
-  robot.move_forward()
-  robot.move_left()
-  robot.move_right()
-  robot.move_backward()
-  print(robot.info())
-  for row in map:
-    print(''.join(row))
+
+print(robot.info())
+#robot.dig()
+#robot.move_forward()
+#robot.move_left()
+#robot.can_move_right()
+#robot.move_right()
+#robot.dig()
+#robot.move_backward()
+#robot.set_ground()
+#robot.move_right()
+#robot.dig()
+#robot.set_ground()
+#robot.get_ground()
+robot.rotate_right()
+robot.move()
+
+print(robot.info())
+
+robot.rotate_left()
+robot.move()
+print(robot.info())
