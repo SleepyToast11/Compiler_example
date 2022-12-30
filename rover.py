@@ -423,31 +423,6 @@ class Rover():
 
 
 rover = Rover("a" ,[[' ']])
-def main():
-    # Initialize the rovers
-    if len(sys.argv) < 1:
-        raise Exception("Missing file path to parse.")
-
-    my_map = []
-    filepath = pathlib.Path("map.txt")  #filepath = pathlib.Path(sys.argv[1])
-    with filepath.open() as f:
-        my_map = f.readlines()
-
-    for i in range(len(my_map)-1):
-        my_map [i] = my_map[i].replace('\n', '')
-
-    global rover
-    rover = Rover(ROVER_1, my_map)
-
-
-
-    rover.wait_for_command()
-
-
-
-
-if __name__=="__main__":
-    main()
 
 
 
@@ -1519,3 +1494,26 @@ class FactorNode(AbstractNode):
             return True
         else:
             return False
+
+
+def main():
+    # Initialize the rovers
+    if len(sys.argv) < 1:
+        raise Exception("Missing file path to parse.")
+
+    my_map = []
+    filepath = pathlib.Path("map.txt")  # filepath = pathlib.Path(sys.argv[1])
+    with filepath.open() as f:
+        my_map = f.readlines()
+
+    for i in range(len(my_map) - 1):
+        my_map[i] = my_map[i].replace('\n', '')
+
+    global rover
+    rover = Rover(ROVER_1, my_map)
+
+    rover.wait_for_command()
+
+
+if __name__ == "__main__":
+    main()
