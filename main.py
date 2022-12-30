@@ -1,7 +1,7 @@
 import pathlib
 import sys
 
-from satelite import ROVER_COMMAND_FILES
+from rover import ROVER_COMMAND_FILES
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
     with filepath.open() as f:
         fcontent = f.read()
 
-    with pathlib.Path(pathlib.Path(__file__).parent.resolve(), "Rover1.txt").open("w") as f:
+    with pathlib.Path(pathlib.Path(__file__).parent.resolve(), "Rover.txt").open("w") as f:
         f.write(fcontent)
 
     print("Command sent successfully! See the rover for more details")

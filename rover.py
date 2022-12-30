@@ -112,8 +112,8 @@ class Rover():
           found = True
 
       # Set the robot's starting position
-      self._map [self.x][self.y] = 'S'
-      return self.x,self.y
+      self._map[self.x][self.y] = "S"
+      return self.x, self.y
       
     
     def go_up(self):
@@ -366,7 +366,7 @@ class Rover():
 
 
 
-rover = Rover("", [])
+rover = None
 def main():
     # Initialize the rovers
     if len(sys.argv) < 1:
