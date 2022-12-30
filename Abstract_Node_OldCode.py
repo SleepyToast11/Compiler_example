@@ -20,13 +20,6 @@ inp = open(str(sys.argv[1]))
 
 code = convert(inp)
 
-class Parser():
-
-    def __init__(self, rover):
-        self.rover = rover
-        program_node = ProgramNode()
-
-
 
 class AbstractNode():
 
@@ -36,14 +29,14 @@ class AbstractNode():
         self.initial_cursor = cursor
         self.nodes = []
 
-    def check_childs(self, index, type, superType):
-        return self.nodes[index].get_types(superType) == type
+    def check_childs(self, index, ob_type, superType):
+        return self.nodes[index].get_types(superType) == ob_type
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         pass
 
-    def get_child_type(self, index, type):
-        return self.nodes[index].get_type(type)
+    def get_child_type(self, index, ob_type):
+        return self.nodes[index].get_type(ob_type)
 
 # generic run function for all nodes, most will not run and be called by other methods like get val or set value
     def run(self):

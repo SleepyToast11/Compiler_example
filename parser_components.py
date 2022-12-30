@@ -212,7 +212,7 @@ class ProgramNode(Node):
         Note that you can also build the SCOPE while going through
         the scope checking for the declarations.
         """
-        global SCOPE
+
         SCOPE = scope
 
         result = -9

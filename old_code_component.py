@@ -63,7 +63,7 @@ Create nodes + parse tree using grammar:
 
 
 
-def go_right(rover):
+def go_right():
     pass
 
 

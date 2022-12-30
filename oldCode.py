@@ -1,20 +1,14 @@
 # Jerome Sparnaay, Muhi Eddin Tahhan
-from Abstract_Node_OldCode import AbstractNode
-from old_code_component import (
-    GLOBAL_SCOPE
-)
+from satelite import (AbstractNode, GLOBAL_SCOPE, CURRENT_SCOPE)
 
 
 class BasicNode(AbstractNode):
-
     basic = {"int", "bool", "double"}
-
-
 
     def name(self):
         return "BasicNode"
 
-    def get_type(self):
+    def get_type(self, ob_type):
         return self.option
 
     def parse(self):
@@ -30,7 +24,7 @@ class BasicNode(AbstractNode):
 
 class ProgramNode(AbstractNode):
 
-    def check_scope(self, decl_list, assign_list):
+    def check_scope(self, desc, assi):
         self.nodes[0].check_scope([], [])
 
     def check_semantics(self):
@@ -74,7 +68,6 @@ class BlockNode(AbstractNode):
 
     def run(self):
 
-        global CURRENT_SCOPE
         self.scope = CURRENT_SCOPE.copy()
 
         for key in CURRENT_SCOPE.keys():
@@ -85,7 +78,6 @@ class BlockNode(AbstractNode):
                 child.run()
 
         self.end_of_block_scope()
-
 
     def end_of_block_scope(self):
 
@@ -106,28 +98,30 @@ class BlockNode(AbstractNode):
         return "Block"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "{")\
-            and self.verify_and_add_token(1, DeclsNode())\
-            and self.verify_and_add_token(2, StmtsNode())\
-            and self.verify_and_add_non_token_node(3, "}"):
-                return True
+        if self.verify_and_add_non_token_node(0, "{") \
+                and self.verify_and_add_token(1, DeclsNode()) \
+                and self.verify_and_add_token(2, StmtsNode()) \
+                and self.verify_and_add_non_token_node(3, "}"):
+            return True
         else:
             return False
+
 
 class DeclsNode(AbstractNode):
     def name(self):
         return "Decls"
 
     def parse(self):
-        if self.verify_and_add_token(0, DeclNode())\
-            and self.verify_and_add_token(1, DeclsNode()):
+        if self.verify_and_add_token(0, DeclNode()) \
+                and self.verify_and_add_token(1, DeclsNode()):
 
-                return True
+            return True
         else:
             return None
 
     def check_semantics(self):
         pass
+
 
 class DeclNode(AbstractNode):
 
@@ -135,15 +129,15 @@ class DeclNode(AbstractNode):
         return "Decl"
 
     def run(self):
-        type = self.nodes[0].get_type()
-        self.nodes[1].set_type(type)
+        ob_type = self.nodes[0].get_type(None)
+        self.nodes[1].set_type(ob_type)
 
     def parse(self):
-        if self.verify_and_add_token(0, TypeNode())\
-            and self.verify_and_add_token(1, IDNode())\
-            and self.verify_and_add_non_token_node(2, ";"):
-                self.nodes[1].set_type(self.nodes[0].get_type())
-                return True
+        if self.verify_and_add_token(0, TypeNode()) \
+                and self.verify_and_add_token(1, IDNode()) \
+                and self.verify_and_add_non_token_node(2, ";"):
+            self.nodes[1].set_type(self.nodes[0].get_type(None))
+            return True
         else:
             return False
 
@@ -157,8 +151,8 @@ class TypeNode(AbstractNode):
     def name(self):
         return "Type"
 
-    def get_type(self):
-        return self.nodes[0].get_type()
+    def get_type(self, ob_type):
+        return self.nodes[0].get_type(None)
 
     def parse(self):
         if self.verify_and_add_token(0, BasicNode()):
@@ -166,15 +160,16 @@ class TypeNode(AbstractNode):
         else:
             return False
 
+
 class StmtsNode(AbstractNode):
 
     def name(self):
         return "stmts"
 
     def parse(self):
-        #since python uses lazy eval, this shouldnt create an infinite loop
-        if self.verify_and_add_token(0, StmtNode())\
-            and self.verify_and_add_token(1, StmtsNode()):
+        # since python uses lazy eval, this shouldn't create an infinite loop
+        if self.verify_and_add_token(0, StmtNode()) \
+                and self.verify_and_add_token(1, StmtsNode()):
 
             return True
         else:
@@ -188,14 +183,15 @@ class StmtNode(AbstractNode):
         if self.option == 0 and self.nodes[0].get_id() in decl_list:
             ids = self.nodes[2].get_Ids([])
             if all((item or any(item in sub_assign_list
-                                for sub_assign_list in assign_list)) for item in ids):     # item cannot be 1 or 0 as it will be rejected
-                    next(reversed(assign_list)).append(self.nodes[0].get_id())
-                    return decl_list, assign_list
+                                for sub_assign_list in assign_list)) for item in
+                   ids):  # item cannot be 1 or 0 as it will be rejected
+                next(reversed(assign_list)).append(self.nodes[0].get_id())
+                return decl_list, assign_list
 
         elif self.option == 1 or self.option == 2 or self.option == 3:
             ids = self.nodes[2].get_Ids([])
             if all((item or any(item in sub_assign_list
-                    for sub_assign_list in assign_list)) for item in ids):
+                                for sub_assign_list in assign_list)) for item in ids):
                 return super().check_scope(decl_list, assign_list)
 
         elif self.option == 4:
@@ -203,14 +199,15 @@ class StmtNode(AbstractNode):
 
         raise Exception("var not in scope")
 
-
-
     def check_semantics(self):
         if self.option == 0:
-            if not (self.nodes[0].get_type() == "int" and self.nodes[2].get_type == "int")\
-                    or (self.nodes[0].get_type() == "double"
-                        and (self.nodes[2].get_type == "int" or self.nodes[2].get_type == "double"))\
-                    or (self.nodes[0].get_type() == self.nodes[2].get_type):
+            if not (self.nodes[0].get_type(None) == "int"
+                    and self.nodes[2].get_type(self.nodes[0].get_type(None)) == "int") \
+                    or (self.nodes[0].get_type(None) == "double"
+                        and (self.nodes[2].get_type == "int"
+                             or self.nodes[2].get_type(self.nodes[0].get_type(None)) == "double")) \
+                    or (self.nodes[0].get_type(None) ==
+                        self.nodes[2].get_type(self.nodes[2].get_type(self.nodes[0].get_type(None)))):
                 raise Exception("bad typing")
 
         elif self.option == 1 or self.option == 2 or self.option == 3:
@@ -240,53 +237,52 @@ class StmtNode(AbstractNode):
         elif self.option == 4:
             self.nodes[0].run()
 
-
     def name(self):
         return "Stmt"
 
     def parse(self):
-        if self.verify_and_add_token(0, LocNode())\
-            and self.verify_and_add_non_token_node(1, "=")\
-            and self.verify_and_add_token(2, BoolNode())\
-            and self.verify_and_add_non_token_node(3, ";"):
-                    self.option = 0
+        if self.verify_and_add_token(0, LocNode()) \
+                and self.verify_and_add_non_token_node(1, "=") \
+                and self.verify_and_add_token(2, BoolNode()) \
+                and self.verify_and_add_non_token_node(3, ";"):
+            self.option = 0
 
-                    return True
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, "if")\
-            and self.verify_and_add_non_token_node(1, "(")\
-            and self.verify_and_add_token(2, BoolNode())\
-            and self.verify_and_add_non_token_node(3, ")")\
-            and self.verify_and_add_token(4, StmtNode())\
-            and self.verify_and_add_non_token_node(5, "else")\
-            and self.verify_and_add_token(6, StmtNode()):
-                    self.option = 1
+            return True
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, "if") \
+                and self.verify_and_add_non_token_node(1, "(") \
+                and self.verify_and_add_token(2, BoolNode()) \
+                and self.verify_and_add_non_token_node(3, ")") \
+                and self.verify_and_add_token(4, StmtNode()) \
+                and self.verify_and_add_non_token_node(5, "else") \
+                and self.verify_and_add_token(6, StmtNode()):
+            self.option = 1
 
-                    return True
+            return True
 
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, "if")\
-            and self.verify_and_add_non_token_node(1, "(")\
-            and self.verify_and_add_token(2, BoolNode())\
-            and self.verify_and_add_non_token_node(3, ")")\
-            and self.verify_and_add_token(4, StmtNode()):
-                    self.option = 2
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, "if") \
+                and self.verify_and_add_non_token_node(1, "(") \
+                and self.verify_and_add_token(2, BoolNode()) \
+                and self.verify_and_add_non_token_node(3, ")") \
+                and self.verify_and_add_token(4, StmtNode()):
+            self.option = 2
 
-                    return True
+            return True
 
 
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, "while")\
-            and self.verify_and_add_non_token_node(1, "(")\
-            and self.verify_and_add_token(2, BoolNode())\
-            and self.verify_and_add_non_token_node(3, ")")\
-            and self.verify_and_add_token(4, StmtNode()):
-                    self.option = 3
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, "while") \
+                and self.verify_and_add_non_token_node(1, "(") \
+                and self.verify_and_add_token(2, BoolNode()) \
+                and self.verify_and_add_non_token_node(3, ")") \
+                and self.verify_and_add_token(4, StmtNode()):
+            self.option = 3
 
-                    return True
+            return True
 
-        elif self.reset()\
-            and self.verify_and_add_token(0, BlockNode()):
+        elif self.reset() \
+                and self.verify_and_add_token(0, BlockNode()):
             self.option = 4
 
             return True
@@ -296,11 +292,11 @@ class StmtNode(AbstractNode):
 
 
 class IDNode(AbstractNode):
-
     value = ""
 
-    def get_Ids(self, list):
-        return list.append(self.get_id())
+    def get_Ids(self, id_list):
+        return id_list.append(self.get_id())
+
     def name(self):
         return "ID"
 
@@ -317,16 +313,15 @@ class IDNode(AbstractNode):
             GLOBAL_SCOPE[self.get_id()]["value"] = value
         CURRENT_SCOPE[self.get_id()]["value"] = value
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if self.get_id() in GLOBAL_SCOPE.keys():
             return GLOBAL_SCOPE[self.get_id()]["type"]
         return CURRENT_SCOPE[self.get_id()]["type"]
 
-    def set_type(self, type):
+    def set_type(self, ob_type):
         if self.get_id() in GLOBAL_SCOPE.keys():
             raise Exception("cannot reassign namespace var")
-        CURRENT_SCOPE[self.get_id()] = {"redeclared": True, "type": str(type)}
-
+        CURRENT_SCOPE[self.get_id()] = {"redeclared": True, "type": str(ob_type)}
 
     def parse(self):
         reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "="}
@@ -347,8 +342,8 @@ class LocNode(AbstractNode):
     def set_value(self, value, scope):
         return self.nodes[0].set_value(value, scope)
 
-    def get_type(self, type):
-        return self.nodes[0].get_type(type)
+    def get_type(self, ob_type):
+        return self.nodes[0].get_type(ob_type)
 
     def name(self):
         return "Loc"
@@ -360,28 +355,29 @@ class LocNode(AbstractNode):
             return False
 
     def check_scope(self, decl_list, assign_list):
-        id = self.nodes[0].get_id()
+        my_id = self.nodes[0].get_id()
         for arrays in assign_list:
             for item in arrays:
-                if id == item:
+                if my_id == item:
                     return decl_list, assign_list
 
         for command in GLOBAL_SCOPE.keys():
             if command == id:
-                return list
+                return decl_list, assign_list
 
         raise Exception("id not found " + self.nodes[0].get_id())
 
+
 class BoolNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 2:
-            if type == "bool" and (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type)):
+            if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
                 Exception("bool issue")
         else:
-            return self.get_child_type(0, type)
+            return self.get_child_type(0, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 2:
@@ -390,14 +386,13 @@ class BoolNode(AbstractNode):
         else:
             return self.nodes[0].get_value()
 
-
     def name(self):
         return "Bool"
 
     def parse(self):
-        if self.verify_and_add_token(0, JoinNode())\
-            and self.verify_and_add_token(1, BoolClNode()):
-                return True
+        if self.verify_and_add_token(0, JoinNode()) \
+                and self.verify_and_add_token(1, BoolClNode()):
+            return True
 
         else:
             return False
@@ -405,13 +400,14 @@ class BoolNode(AbstractNode):
 
 class BoolClNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 3:
-            if (type == "bool") and (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type)):
+            if (ob_type == "bool") and (
+                    self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
                 Exception("boolCl issue")
-        elif self.check_childs(1, "bool", type):
+        elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
             Exception("boolCl issue")
@@ -427,24 +423,25 @@ class BoolClNode(AbstractNode):
         return "BoolCl"
 
     def parse(self):
-        if  self.verify_and_add_non_token_node(0, "||") \
-            and self.verify_and_add_token(1, JoinNode()) \
-            and self.verify_and_add_token(2, BoolClNode()):
-                return True
+        if self.verify_and_add_non_token_node(0, "||") \
+                and self.verify_and_add_token(1, JoinNode()) \
+                and self.verify_and_add_token(2, BoolClNode()):
+            return True
 
         else:
             return None
 
+
 class JoinNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 2:
-            if type == "bool" and (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type)):
+            if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
                 Exception("join issue")
         else:
-            return self.get_child_type(0, type)
+            return self.get_child_type(0, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 2:
@@ -457,21 +454,23 @@ class JoinNode(AbstractNode):
         return "Join"
 
     def parse(self):
-        if self.verify_and_add_token(0, EqualityNode())\
-            and self.verify_and_add_token(1, JoinClNode()):
-                    return True
+        if self.verify_and_add_token(0, EqualityNode()) \
+                and self.verify_and_add_token(1, JoinClNode()):
+            return True
         else:
             return False
 
+
 class JoinClNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 3:
-            if (type == "bool") and (self.check_childs(1, "bool", type) and self.check_childs(2, "bool", type)):
+            if (ob_type == "bool") and (
+                    self.check_childs(1, "bool", ob_type) and self.check_childs(2, "bool", ob_type)):
                 return "bool"
             else:
                 Exception("boolCl issue")
-        elif self.check_childs(1, "bool", type):
+        elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
             Exception("joinCl issue")
@@ -483,33 +482,32 @@ class JoinClNode(AbstractNode):
         else:
             return self.nodes[1].get_value()
 
-
     def name(self):
         return "JoinCl"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "&&")\
-            and self.verify_and_add_token(1, EqualityNode())\
-            and self.verify_and_add_token(2, JoinClNode()):
-                return True
+        if self.verify_and_add_non_token_node(0, "&&") \
+                and self.verify_and_add_token(1, EqualityNode()) \
+                and self.verify_and_add_token(2, JoinClNode()):
+            return True
 
         else:
             return None
 
 
-
 class EqualityNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 2:
-            if (type == "bool") and (((self.check_childs(0, "int", type) or self.check_childs(0, "double", type)) \
-                and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)))\
-                    or (self.check_childs(0, "bool", type) and self.check_childs(1, "bool", type))):
-                    return "bool"
+            if (ob_type == "bool") and (
+                    ((self.check_childs(0, "int", ob_type) or self.check_childs(0, "double", ob_type))
+                     and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)))
+                    or (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type))):
+                return "bool"
             else:
                 Exception("rel issue")
         else:
-            return self.get_child_type(0, type)
+            return self.get_child_type(0, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 2:
@@ -525,25 +523,27 @@ class EqualityNode(AbstractNode):
         return "Equality"
 
     def parse(self):
-        if self.verify_and_add_token(0, RelNode())\
-            and self.verify_and_add_token(1, EqualityClNode()):
+        if self.verify_and_add_token(0, RelNode()) \
+                and self.verify_and_add_token(1, EqualityClNode()):
 
-                    return True
+            return True
         else:
             return False
 
+
 class EqualityClNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 3:
-            if (type == "bool") and (((self.check_childs(1, "int", type) or self.check_childs(1, "double", type)) \
-                    and (self.check_childs(2, "int", type) or self.check_childs(2, "double", type)))\
-                        or (self.check_childs(2, "bool", type) and self.check_childs(1, "bool", type))):
-                    return "bool"
+            if (ob_type == "bool") and (
+                    ((self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type))
+                     and (self.check_childs(2, "int", ob_type) or self.check_childs(2, "double", ob_type)))
+                    or (self.check_childs(2, "bool", ob_type) and self.check_childs(1, "bool", ob_type))):
+                return "bool"
             else:
                 raise Exception("eaqualityCl issue")
         else:
-            self.get_child_type(1, type)
+            self.get_child_type(1, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 3:
@@ -555,37 +555,38 @@ class EqualityClNode(AbstractNode):
         else:
             return self.nodes[1].get_value(), self.option
 
-
     def name(self):
         return "EqualityCl"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "==")\
-            and self.verify_and_add_token(1, RelNode())\
-            and self.verify_and_add_token(2, EqualityClNode()):
-                    self.option = "=="
-                    return True
+        if self.verify_and_add_non_token_node(0, "==") \
+                and self.verify_and_add_token(1, RelNode()) \
+                and self.verify_and_add_token(2, EqualityClNode()):
+            self.option = "=="
+            return True
 
-        elif self.reset()\
+        elif self.reset() \
                 and self.verify_and_add_non_token_node(0, "!=") \
                 and self.verify_and_add_token(1, RelNode()) \
                 and self.verify_and_add_token(2, EqualityClNode()):
-                        self.option = "!="
-                        return True
+            self.option = "!="
+            return True
         else:
             return None
 
+
 class RelNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 2:
-            if (type == "bool") and (self.check_childs(0, "int", type) or self.check_childs(0, "double", type)) \
-                and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
-                    return "bool"
+            if (ob_type == "bool") and (self.check_childs(0, "int", ob_type)
+                                        or self.check_childs(0, "double", ob_type)) \
+                    and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
+                return "bool"
             else:
                 Exception("rel issue")
         else:
-            return self.get_child_type(0, type)
+            return self.get_child_type(0, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 2:
@@ -605,63 +606,61 @@ class RelNode(AbstractNode):
         return "Rel"
 
     def parse(self):
-        if self.verify_and_add_token(0, ExprNode())\
-            and self.verify_and_add_token(1, RelTailNode()):
+        if self.verify_and_add_token(0, ExprNode()) \
+                and self.verify_and_add_token(1, RelTailNode()):
 
-                return True
+            return True
         else:
             return False
 
+
 class RelTailNode(AbstractNode):
 
-    def get_type(self, type):
-        if (type == "bool") and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
-            return self.get_child_type(1, type)
+    def get_type(self, ob_type):
+        if (ob_type == "bool") and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
+            return self.get_child_type(1, ob_type)
         else:
             Exception("rel tail issue")
 
     def get_value(self):
         return self.nodes[1].get_value(), self.option
 
-
-
-
     def name(self):
         return "RelTail"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "<")\
-            and self.verify_and_add_token(1, ExprNode()):
-                    self.option = "<"
-                    return True
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, ">")\
-            and self.verify_and_add_token(1, ExprNode()):
-                    self.option = ">"
-                    return True
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, "<=")\
-            and self.verify_and_add_token(1, ExprNode()):
-                    self.option = "<="
-                    return True
-        elif self.reset()\
-            and self.verify_and_add_non_token_node(0, ">=")\
-            and self.verify_and_add_token(1, ExprNode()):
-                    self.option = ">="
-                    return True
+        if self.verify_and_add_non_token_node(0, "<") \
+                and self.verify_and_add_token(1, ExprNode()):
+            self.option = "<"
+            return True
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, ">") \
+                and self.verify_and_add_token(1, ExprNode()):
+            self.option = ">"
+            return True
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, "<=") \
+                and self.verify_and_add_token(1, ExprNode()):
+            self.option = "<="
+            return True
+        elif self.reset() \
+                and self.verify_and_add_non_token_node(0, ">=") \
+                and self.verify_and_add_token(1, ExprNode()):
+            self.option = ">="
+            return True
         else:
             return None
 
+
 class ExprNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 2:
-            if not (self.check_childs(0, "int", type) or self.check_childs(0, "double", type))\
-                and not ((self.check_childs(1, "int", type) or self.check_childs(1, "double", type))):
-                    raise Exception("Term tail does not agree")
+            if not (self.check_childs(0, "int", ob_type) or self.check_childs(0, "double", ob_type)) \
+                    and not (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
+                raise Exception("Term tail does not agree")
         else:
-            return self.get_child_type(0, type)
-
+            return self.get_child_type(0, ob_type)
 
     def get_value(self):
         if len(self.nodes) == 2:
@@ -673,28 +672,27 @@ class ExprNode(AbstractNode):
         else:
             return self.nodes[0].get_value()
 
-
     def name(self):
         return "Expr"
 
     def parse(self):
-        if self.verify_and_add_token(0, TermNode())\
-            and self.verify_and_add_token(1, ExprTailNode()):
+        if self.verify_and_add_token(0, TermNode()) \
+                and self.verify_and_add_token(1, ExprTailNode()):
 
-                    return True
+            return True
         else:
             return False
 
+
 class ExprTailNode(AbstractNode):
 
-
-    def get_type(self, type):
-        if (type == "int" or type == "double") \
-                and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
+    def get_type(self, ob_type):
+        if (ob_type == "int" or ob_type == "double") \
+                and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
             if len(self.nodes) == 3:
-                if not ((self.check_childs(2, "int", type) or self.check_childs(2, "double", type))):
+                if not (self.check_childs(2, "int", ob_type) or self.check_childs(2, "double", ob_type)):
                     raise Exception()
-            return self.get_child_type(1, type)
+            return self.get_child_type(1, ob_type)
         else:
             raise Exception("expr tail does not agree")
 
@@ -712,30 +710,32 @@ class ExprTailNode(AbstractNode):
         return "ExprTail"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "+")\
-            and self.verify_and_add_token(1, TermNode())\
-            and self.verify_and_add_token(2, ExprTailNode()):
-                    self.option = "+"
-                    return True
-        elif self.reset()\
+        if self.verify_and_add_non_token_node(0, "+") \
+                and self.verify_and_add_token(1, TermNode()) \
+                and self.verify_and_add_token(2, ExprTailNode()):
+            self.option = "+"
+            return True
+        elif self.reset() \
                 and self.verify_and_add_non_token_node(0, "-") \
                 and self.verify_and_add_token(1, TermNode()) \
                 and self.verify_and_add_token(2, ExprTailNode()):
-                        self.option = "-"
-                        return True
+            self.option = "-"
+            return True
         else:
             return None
 
+
 class TermNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if len(self.nodes) == 3:
-            if not (self.check_childs(0, "int", type) or self.check_childs(0, "double", type)) \
-                    or not ((self.check_childs(1, "int", type) or self.check_childs(1, "double", type))):
+            if not (self.check_childs(0, "int", ob_type) or self.check_childs(0, "double", ob_type)) \
+                    or not (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
                 raise Exception("Term tail does not agree")
-            return self.get_child_type(1, type)
+            return self.get_child_type(1, ob_type)
         else:
-            return self.get_child_type(0, type)
+            return self.get_child_type(0, ob_type)
+
     def get_value(self):
         if len(self.nodes) == 2:
             val, op = self.nodes[1].get_value()
@@ -750,12 +750,13 @@ class TermNode(AbstractNode):
         return "Term"
 
     def parse(self):
-        if self.verify_and_add_token(0, UnaryNode())\
-            and self.verify_and_add_token(1, TermTailNode()):
+        if self.verify_and_add_token(0, UnaryNode()) \
+                and self.verify_and_add_token(1, TermTailNode()):
 
-                    return True
+            return True
         else:
             return False
+
 
 class TermTailNode(AbstractNode):
 
@@ -768,16 +769,15 @@ class TermTailNode(AbstractNode):
                 return (val / self.nodes[1].get_value()), self.option
         return self.nodes[1].get_value(), self.option
 
-    def get_type(self, type):
-        if (type != "int" or type != "double")\
-                and (self.check_childs(1, "int", type) or self.check_childs(1, "double", type)):
+    def get_type(self, ob_type):
+        if (ob_type != "int" or ob_type != "double") \
+                and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
             if len(self.nodes) == 3:
-                if not ((self.check_childs(2, "int", type) or self.check_childs(2, "double", type))):
+                if not (self.check_childs(2, "int", ob_type) or self.check_childs(2, "double", ob_type)):
                     raise Exception("term tail does not agree")
-            return self.get_child_type(1, type)
+            return self.get_child_type(1, ob_type)
         else:
             raise Exception("term tail does not agree")
-
 
     def name(self):
         return "TermTail"
@@ -786,93 +786,85 @@ class TermTailNode(AbstractNode):
         if self.verify_and_add_non_token_node(0, "*") \
                 and self.verify_and_add_token(1, UnaryNode()) \
                 and self.verify_and_add_token(2, TermTailNode()):
-                    self.option = "*"
-                    return True
+            self.option = "*"
+            return True
 
-        elif self.reset()\
+        elif self.reset() \
                 and self.verify_and_add_non_token_node(0, "/") \
-                and self.verify_and_add_token(1, UnaryNode())\
+                and self.verify_and_add_token(1, UnaryNode()) \
                 and self.verify_and_add_token(2, TermTailNode()):
-                    self.option = "/"
-                    return True
+            self.option = "/"
+            return True
 
         else:
             return None
 
+
 class UnaryNode(AbstractNode):
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if self.option == 0:
-            if self.nodes[1].get_type(type) == "bool":
+            if self.nodes[1].get_type(ob_type) == "bool":
                 return "bool"
 
         elif self.option == 1:
-            if self.nodes[1].get_type(type) == "int" or self.nodes[1].get_type(type) == "double":
-                return self.nodes[1].get_type(type)
+            if self.nodes[1].get_type(ob_type) == "int" or self.nodes[1].get_type(ob_type) == "double":
+                return self.nodes[1].get_type(ob_type)
 
         elif self.option == 2:
-            return self.nodes[0].get_type(type)
-        raise Exception("bad unary type")
-
-
+            return self.nodes[0].get_type(ob_type)
+        raise Exception("bad unary ob_type")
 
     def get_value(self):
         if self.option == 0:
-            bool = not self.nodes[1].get_value()
-            return bool
+            my_bool = not self.nodes[1].get_value()
+            return my_bool
         elif self.option == 1:
-                return self.nodes[1].get_value() * -1
+            return self.nodes[1].get_value() * -1
         elif self.option == 2:
             return self.nodes[0].get_value()
-
 
     def name(self):
         return "Unary"
 
     def parse(self):
-        if self.verify_and_add_non_token_node(0, "!")\
-            and self.verify_and_add_token(1, UnaryNode()):
-                    self.option = 0
-                    return True
+        if self.verify_and_add_non_token_node(0, "!") \
+                and self.verify_and_add_token(1, UnaryNode()):
+            self.option = 0
+            return True
 
 
-        elif self.reset()\
+        elif self.reset() \
                 and self.verify_and_add_non_token_node(0, "-") \
                 and self.verify_and_add_token(1, UnaryNode()):
-                    self.option = 1
-                    return True
+            self.option = 1
+            return True
 
-        elif self.reset()\
-            and self.verify_and_add_token(0, FactorNode()):
-                    self.option = 2
-                    return True
+        elif self.reset() \
+                and self.verify_and_add_token(0, FactorNode()):
+            self.option = 2
+            return True
         else:
             return False
 
 
 class FactorNode(AbstractNode):
-
     reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "=", "True", "False"}
 
     types = []
 
-    type = ""
+    ob_type = ""
 
     val = None
 
-    def get_Ids(self, list):
+    def get_Ids(self, id_list):
         if self.option == 2:
-            list.append(True)
-            return list
+            id_list.append(True)
+            return id_list
         elif self.option == 0:
-            return self.nodes[1].get_Ids(list)
+            return self.nodes[1].get_Ids(id_list)
         else:
-            return self.nodes[0].get_Ids(list)
-
-
-
-    def get_type(self):
-        return self.type
+            return self.nodes[0].get_Ids(id_list)
 
     def get_value(self):
         if self.option == 0:
@@ -882,38 +874,37 @@ class FactorNode(AbstractNode):
         else:
             return self.val
 
-    def get_type(self, type):
+    def get_type(self, ob_type):
         if self.option == 2:
-            if type == "bool":
+            if ob_type == "bool":
                 if "bool" in self.types:
-                    self.type = "bool"
+                    self.ob_type = "bool"
                     self.val = bool(self.val)
                     return "bool"
                 else:
                     return self.types[0]
-            elif type == "int":
+            elif ob_type == "int":
                 if "int" in self.types:
                     self.val = int(self.val)
-                    self.type = "int"
+                    self.ob_type = "int"
                     return "int"
                 else:
                     return self.types[0]
-            elif type == "double":
+            elif ob_type == "double":
                 if "double" in self.types:
                     self.val = float(self.val)
-                    self.type = "double"
+                    self.ob_type = "double"
                     return "double"
                 else:
                     return self.types[0]
             else:
-                raise Exception("not correct type")
+                raise Exception("not correct ob_type")
         elif self.option == 0:
-            self.type = self.nodes[1].get_type()
-            return self.type
+            self.ob_type = self.nodes[1].get_type(ob_type)
+            return self.ob_type
         else:
-            self.type = self.nodes[0].get_type()
-            return self.type
-
+            self.ob_type = self.nodes[0].get_type(ob_type)
+            return self.ob_type
 
     def name(self):
         return "Factor"
@@ -921,25 +912,25 @@ class FactorNode(AbstractNode):
     def parse(self):
         token = self.get_token()
         if token not in self.reserved_symbole:
-            if self.verify_and_add_non_token_node(0, "(")\
-                and self.verify_and_add_token(1, BoolNode())\
-                and self.verify_and_add_non_token_node(2, ")"):
-                        self.option = 0
-                        return True
+            if self.verify_and_add_non_token_node(0, "(") \
+                    and self.verify_and_add_token(1, BoolNode()) \
+                    and self.verify_and_add_non_token_node(2, ")"):
+                self.option = 0
+                return True
 
-            elif self.reset()\
-                and not self.is_type() \
-                and self.verify_and_add_token(0, LocNode()):
-                    self.option = 1
-                    return True
+            elif self.reset() \
+                    and not self.is_type() \
+                    and self.verify_and_add_token(0, LocNode()):
+                self.option = 1
+                return True
 
             elif self.reset() and self.is_type():
-                    #self.nodes.append(GenericNode(self.get_token()))
-                    self.val = self.get_token()
-                    self.option = 2
-                    self.iterate_cursor()
+                # self.nodes.append(GenericNode(self.get_token()))
+                self.val = self.get_token()
+                self.option = 2
+                self.iterate_cursor()
 
-                    return True
+                return True
             else:
                 return False
         else:
