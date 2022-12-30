@@ -8,15 +8,11 @@ import traceback
 MAX_RUNTIME = 36000
 CURRENT_SCOPE = {}
 cursor = 0
-NORTH=1
-EAST=2
-SOUTH=3
-WEST=4 
-robot='R'
-
-
-
-
+NORTH = 1
+EAST = 2
+SOUTH = 3
+WEST = 4
+robot = 'R'
 
 # Rovers that exist
 ROVER_1 = "Rover"
@@ -63,7 +59,6 @@ def get_command(rover_name):
 
 class Rover():
 
-
     def __init__(self, name, the_map):
         for i in range(len(the_map) - 1):
             the_map[i] = [i for i in the_map[i]]
@@ -71,7 +66,7 @@ class Rover():
         self.ground_memo = the_map.copy()
         self.name = name
         self.x, self.y = self.spawn()
-        self.orientation=NORTH
+        self.orientation = NORTH
 
     def print_int(self):
         print(self.global_sco["systemInt"]["value"])
@@ -80,7 +75,7 @@ class Rover():
         print(self.global_sco["systemBool"]["value"])
 
     def print_map(self):
-        print("X pos" +str(self.x))
+        print("X pos" + str(self.x))
         print("Y pos" + str(self.y))
         for i in range(len(self.r_map)):
             for j in range(len(self.r_map[i])):
@@ -98,11 +93,11 @@ class Rover():
     def get_global_value(self, var, inner):
 
         if var == "rover":
-            if inner  == "value":
+            if inner == "value":
                 return None
             else:
                 return "rover"
-        elif var == "systemInt" :
+        elif var == "systemInt":
             if inner == "value":
                 return self.global_sco["systemInt"]["value"]
             else:
@@ -112,37 +107,37 @@ class Rover():
                 return self.global_sco["systemBool"]["value"]
             else:
                 return "bool"
-        elif var == "printInt"  :
+        elif var == "printInt":
             if inner == "value":
                 return self.print_int()
             else:
                 return "rover"
-        elif var == "printBool"  :
+        elif var == "printBool":
             if inner == "value":
                 return self.print_bool()
             else:
                 return "rover"
-        elif var == "printMap"  :
+        elif var == "printMap":
             if inner == "value":
                 return self.print_map()
             else:
                 return "rover"
-        elif var == "goRight"   :
+        elif var == "goRight":
             if inner == "value":
                 return self.go_right()
             else:
                 return "rover"
-        elif var == "goUp"      :
+        elif var == "goUp":
             if inner == "value":
                 return self.go_up()
             else:
                 return "rover"
-        elif var == "goLeft"    :
+        elif var == "goLeft":
             if inner == "value":
                 return self.go_left()
             else:
                 return "rover"
-        elif var == "goDown"    :
+        elif var == "goDown":
             if inner == "value":
                 return self.go_down()
             else:
@@ -161,7 +156,7 @@ class Rover():
             if inner == "value":
                 return self.can_go_left()
             else:
-              return "rover"
+                return "rover"
         elif var == "canGoDown":
             if inner == "value":
                 return self.can_go_down()
@@ -171,7 +166,7 @@ class Rover():
             if inner == "value":
                 return self.get_ground()
             else:
-              return "rover"
+                return "rover"
         elif var == "setGround":
             if inner == "value":
                 return self.set_ground()
@@ -193,10 +188,8 @@ class Rover():
             else:
                 return "rover"
 
-
     def set_global_value(self, var, inner, value):
         self.global_sco[var][inner] = value
-
 
     def get_keys(self):
         global_sco = [
@@ -222,6 +215,7 @@ class Rover():
         ]
 
         return global_sco
+
     def print(self, msg):
         print(f"{self.name}: {msg}")
 
@@ -238,8 +232,6 @@ class Rover():
         program.check_scope(None, None)
         program.check_semantics()
         program.run()
-
-
 
     def wait_for_command(self):
         start = time.time()
@@ -259,261 +251,257 @@ class Rover():
                     self.print("Finished running command.\n\n")
 
     def spawn(self):
-      # Find an empty spot on the map to spawn the robot
-      x, y = 0, 0
-      found = False
-      while not found:
-        x = random.randint(0, len(self.r_map) - 1)
-        y = random.randint(0, len(self.r_map[0]) - 1)
-        if self.r_map [x][y] == ' ':
-          found = True
+        # Find an empty spot on the map to spawn the robot
+        x, y = 0, 0
+        found = False
+        while not found:
+            x = random.randint(0, len(self.r_map) - 1)
+            y = random.randint(0, len(self.r_map[0]) - 1)
+            if self.r_map[x][y] == ' ':
+                found = True
 
-      # Set the robot's starting position
-      self.r_map[x][y] = "S"
-      return x, y
-      
-    
+        # Set the robot's starting position
+        self.r_map[x][y] = "S"
+        return x, y
+
     def go_up(self):
-      canTurn = self.can_go_up()
-      if canTurn==True:
-        if self.orientation==NORTH:  
-            self.x -= 1
-        elif self.orientation==EAST:
-            self.y += 1
-        elif self.orientation==SOUTH:
-            self.x += 1
-        elif self.orientation==WEST:
-            self.y -= 1
-      else:
-          print("can't move")  
-    
-    def go_down(self):
-      canTurn = self.can_go_left()
-      if canTurn==True:
-        if self.orientation==NORTH:  
-            self.x += 1
-        elif self.orientation==EAST:
-            self.y -= 1
-        elif self.orientation==SOUTH:
-            self.x -= 1
-        elif self.orientation==WEST:
-            self.y += 1
-      else:
-          print("can't move")  
-    
-    def go_left(self):
-      canTurn = self.can_go_left()
-      if canTurn==True:
-        if self.orientation==NORTH:  
-            self.y -= 1
-        elif self.orientation==EAST:
-            self.x -= 1
-        elif self.orientation==SOUTH:
-            self.y += 1
-        elif self.orientation==WEST:
-            self.x += 1
-      else:
-          print("can't move")  
-    
-    def go_right(self):
-      canTurn = self.can_go_right()
-      if canTurn==True:
-        if self.orientation==NORTH:  
-            self.y += 1
-        elif self.orientation==EAST:
-            self.x += 1
-        elif self.orientation==SOUTH:
-            self.y -= 1
-        elif self.orientation==WEST:
-            self.x -= 1
-      else:
-          print("can't move")  
-        
-    
-    def dig(self):
-      if self.r_map[self.x-1][self.y] == 'D':
-        print("digging.............")  
-        self.r_map[self.x-1][self.y] = 'T'
-        print("treasure was taken")
-      elif self.r_map[self.x+1][self.y] == 'D':
-        print("digging.............")  
-        self.r_map[self.x+1][self.y] = 'T'
-        print("treasure was taken")
-      elif self.r_map[self.x][self.y+1] == 'D':
-        print("digging.............")  
-        self.r_map[self.x][self.y+1] = 'T'
-        print("treasure was taken") 
-      elif self.r_map[self.x][self.y-1] == 'D':
-        print("digging.............")  
-        self.r_map[self.x][self.y-1] = 'T'
-        print("treasure was taken")         
-      else:
-          print("you can't dig here")
-    
-    def info(self):
-      for i in range(len(self.r_map)):
-       for j in range(len(self.r_map[i])):
-        if self.r_map [i][j] == 'R':
-          self.r_map [i][j] = ''
-      
-      self.r_map [self.x][self.y]=robot
-      for row in self.r_map :
-          print(''.join(row))
-      print("the orientation is: ")
-      if self.orientation==1:
-          print("NORTH")
-      if self.orientation==2:
-          print("EAST")
-      if self.orientation==3:
-          print("SOUTH")
-      if self.orientation==4:
-          print("WEST")
-      
-      return self.x, self.y
+        canTurn = self.can_go_up()
+        if canTurn == True:
+            if self.orientation == NORTH:
+                self.x -= 1
+            elif self.orientation == EAST:
+                self.y += 1
+            elif self.orientation == SOUTH:
+                self.x += 1
+            elif self.orientation == WEST:
+                self.y -= 1
+        else:
+            print("can't move")
 
+    def go_down(self):
+        canTurn = self.can_go_left()
+        if canTurn == True:
+            if self.orientation == NORTH:
+                self.x += 1
+            elif self.orientation == EAST:
+                self.y -= 1
+            elif self.orientation == SOUTH:
+                self.x -= 1
+            elif self.orientation == WEST:
+                self.y += 1
+        else:
+            print("can't move")
+
+    def go_left(self):
+        canTurn = self.can_go_left()
+        if canTurn == True:
+            if self.orientation == NORTH:
+                self.y -= 1
+            elif self.orientation == EAST:
+                self.x -= 1
+            elif self.orientation == SOUTH:
+                self.y += 1
+            elif self.orientation == WEST:
+                self.x += 1
+        else:
+            print("can't move")
+
+    def go_right(self):
+        canTurn = self.can_go_right()
+        if canTurn == True:
+            if self.orientation == NORTH:
+                self.y += 1
+            elif self.orientation == EAST:
+                self.x += 1
+            elif self.orientation == SOUTH:
+                self.y -= 1
+            elif self.orientation == WEST:
+                self.x -= 1
+        else:
+            print("can't move")
+
+    def dig(self):
+        if self.r_map[self.x - 1][self.y] == 'D':
+            print("digging.............")
+            self.r_map[self.x - 1][self.y] = 'T'
+            print("treasure was taken")
+        elif self.r_map[self.x + 1][self.y] == 'D':
+            print("digging.............")
+            self.r_map[self.x + 1][self.y] = 'T'
+            print("treasure was taken")
+        elif self.r_map[self.x][self.y + 1] == 'D':
+            print("digging.............")
+            self.r_map[self.x][self.y + 1] = 'T'
+            print("treasure was taken")
+        elif self.r_map[self.x][self.y - 1] == 'D':
+            print("digging.............")
+            self.r_map[self.x][self.y - 1] = 'T'
+            print("treasure was taken")
+        else:
+            print("you can't dig here")
+
+    def info(self):
+        for i in range(len(self.r_map)):
+            for j in range(len(self.r_map[i])):
+                if self.r_map[i][j] == 'R':
+                    self.r_map[i][j] = ''
+
+        self.r_map[self.x][self.y] = robot
+        for row in self.r_map:
+            print(''.join(row))
+        print("the orientation is: ")
+        if self.orientation == 1:
+            print("NORTH")
+        if self.orientation == 2:
+            print("EAST")
+        if self.orientation == 3:
+            print("SOUTH")
+        if self.orientation == 4:
+            print("WEST")
+
+        return self.x, self.y
 
     def can_go_right(self):
         canTurn = False
-        if self.orientation==NORTH:          
-            if self.x >= 0 and self.r_map[self.x][self.y+1] != 'X':
+        if self.orientation == NORTH:
+            if self.x >= 0 and self.r_map[self.x][self.y + 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
                 self.set_global_value("systemBool", "value", False)
-        elif self.orientation==EAST:
-            if self.x >= 0 and self.r_map[self.x+1][self.y] != 'X':
+        elif self.orientation == EAST:
+            if self.x >= 0 and self.r_map[self.x + 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
+                self.set_global_value("systemBool", "value", False)
         elif self.orientation == SOUTH:
-            if self.x >= 0 and self.r_map[self.x][self.y-1] != 'X':
+            if self.x >= 0 and self.r_map[self.x][self.y - 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==WEST:
-            if self.x >= 0 and self.r_map[self.x-1][self.y] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == WEST:
+            if self.x >= 0 and self.r_map[self.x - 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
+                self.set_global_value("systemBool", "value", False)
         return canTurn
 
     # noinspection PyTypeChecker
     def can_go_left(self):
         canTurn = False
-        if self.orientation==NORTH:          
-         if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
-             canTurn = True
-             self.set_global_value("systemBool", "value", True)
-         else:
-            self.set_global_value("systemBool", "value", False)
-        elif self.orientation==EAST:
-            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
+        if self.orientation == NORTH:
+            if self.x > 0 and self.r_map[self.x][self.y - 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==SOUTH:
-            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == EAST:
+            if self.x > 0 and self.r_map[self.x - 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==WEST:
-            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == SOUTH:
+            if self.x > 0 and self.r_map[self.x][self.y + 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == WEST:
+            if self.x > 0 and self.r_map[self.x + 1][self.y] != 'X':
+                canTurn = True
+                self.set_global_value("systemBool", "value", True)
+            else:
+                self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def can_go_up(self):
         canTurn = False
-        if self.orientation==NORTH:          
-         if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
-             canTurn = True
-             self.set_global_value("systemBool", "value", True)
-         else:
-            self.set_global_value("systemBool", "value", False)
-        elif self.orientation==EAST:
-            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
+        if self.orientation == NORTH:
+            if self.x > 0 and self.r_map[self.x - 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==SOUTH:
-            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == EAST:
+            if self.x > 0 and self.r_map[self.x][self.y + 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==WEST:
-            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == SOUTH:
+            if self.x > 0 and self.r_map[self.x + 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == WEST:
+            if self.x > 0 and self.r_map[self.x][self.y - 1] != 'X':
+                canTurn = True
+                self.set_global_value("systemBool", "value", True)
+            else:
+                self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def can_go_down(self):
         canTurn = False
-        if self.orientation==NORTH:          
-         if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
-             canTurn = True
-             self.set_global_value("systemBool", "value", True)
-         else:
-            self.set_global_value("systemBool", "value", False)
-        elif self.orientation==EAST:
-            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
+        if self.orientation == NORTH:
+            if self.x > 0 and self.r_map[self.x + 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==SOUTH:
-            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == EAST:
+            if self.x > 0 and self.r_map[self.x][self.y - 1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
-        elif self.orientation==WEST:
-            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == SOUTH:
+            if self.x > 0 and self.r_map[self.x - 1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
-               self.set_global_value("systemBool", "value", False)
+                self.set_global_value("systemBool", "value", False)
+        elif self.orientation == WEST:
+            if self.x > 0 and self.r_map[self.x][self.y + 1] != 'X':
+                canTurn = True
+                self.set_global_value("systemBool", "value", True)
+            else:
+                self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def turn_right(self):
-        
-      if self.orientation == NORTH:
-        self.orientation = EAST
-      elif self.orientation == WEST:
-        self.orientation = NORTH
-      elif self.orientation == SOUTH:
-        self.orientation = WEST
-      elif self.orientation == EAST:
-        self.orientation = SOUTH
+
+        if self.orientation == NORTH:
+            self.orientation = EAST
+        elif self.orientation == WEST:
+            self.orientation = NORTH
+        elif self.orientation == SOUTH:
+            self.orientation = WEST
+        elif self.orientation == EAST:
+            self.orientation = SOUTH
 
     def turn_left(self):
-        
-      if self.orientation == NORTH:
-        self.orientation = WEST
-      elif self.orientation == EAST:
-        self.orientation = NORTH
-      elif self.orientation == SOUTH:
-        self.orientation = EAST
-      elif self.orientation == WEST:
-        self.orientation = SOUTH
 
+        if self.orientation == NORTH:
+            self.orientation = WEST
+        elif self.orientation == EAST:
+            self.orientation = NORTH
+        elif self.orientation == SOUTH:
+            self.orientation = EAST
+        elif self.orientation == WEST:
+            self.orientation = SOUTH
 
     def set_ground(self):
 
         self.ground_memo[self.x][self.y] = self.get_global_value("systemInt", "value")
 
     def print_ground(self):
-        
+
         print("ground were set at", self.ground_memo)
 
     def get_ground(self):
@@ -521,14 +509,16 @@ class Rover():
         self.set_global_value("systemInt", "value", self.ground_memo[self.x][self.y])
 
 
-
-rover = Rover("a" ,[[' ']])
-
-
+rover = Rover("a", [[' ']])
 
 
 class AbstractNode():
 
+    # since it is a lot of repeat code, many functions are simply made to make it faster to access and verify
+    # variable of the child nodes
+
+    # All variable that are used in the nodes. they are not standerized, therefore getting the values of the nodes
+    # are exclusively made through the methods, where those apply
     def __init__(self):
         self.initial_cursor = cursor
         self.nodes = []
@@ -538,27 +528,37 @@ class AbstractNode():
         self.value = ""
         self.ob_type = ""
 
-
+    # Method to more easily get the type of child node and verify if it is the right type
     def check_childs(self, index, ob_type, superType):
         return self.nodes[index].get_type(superType) == ob_type
 
-
+    # For nodes that applies gets the type and when it is an assignment, sends a type so that
+    # if it is a factor (free var) allows it to make it the right type.
     def get_type(self, ob_type):
         pass
 
+    # a faster method to access get_type() of child nodes
     def get_child_type(self, index, ob_type):
         return self.nodes[index].get_type(ob_type)
 
-    # generic run function for all nodes, most will not run and be called by other methods like get val or set value
+    # generic run function for all nodes. Most nodes will not be called by this method and
+    # instead be called by the parent nodes stmt or decl with methods like get_val or set_value() to get the value
+    # allowing for the flow of if and while loops and assignment of variables in stmt. See Blocknode run
+    # to see how scope variables is handle.
     def run(self):
         for child in self.nodes:
             child.run()
 
+    # checks the semantics best we could think of all edge cases and will stop the program from running if it runs
+    # into trouble
     def check_semantics(self):
         for child in self.nodes:
             if child is not None:
                 child.check_semantics()
 
+    # when called upon a node, will recursively call the children with the same method. When an id node is reached,
+    # will append its id to the list and return the list. It returns in the end, all the id required in a node
+    # to evaluate it to make sure they all have been assigned
     def get_Ids(self, list):
         for child in self.nodes:
             if child is not None:
@@ -567,18 +567,31 @@ class AbstractNode():
                     list.append(child.get_Ids(list))
         return list
 
+    # literal name of the Node, not to be confused with ID. Usually just used to print the trace, function removed
+    # from this project
     def name(self):
         return None
 
+    # If the parser fails to create the node because code token do not agree with the language, the node will
+    # call this method to reset the variables used to parse and allow the next possible line of language to be tried
+    # to parse. The nodes is re set to the initial number it was at, at the creation of the node and the children are
+    # all removed by assigning a new empty array the nodes.
     def reset(self):
         global cursor
         cursor = self.initial_cursor
         self.nodes = []
         return True
 
+    # return the token at the current cursor position. This ROVER_COMMAND["code"] is a list of token that
+    # has all the spaces and newlines removed
     def get_token(self):
         return ROVER_COMMAND["code"][cursor]
 
+    # verify if the node passed parses, if yes, the node will be appended to the nodes array containing the
+    # children of the node and if not the node can either be empty, not appending any nodes and if not
+    # will return false which will fail the current line of language to parse so the next line
+    # (line ex: <decls><stmts>). note: index is not used anymore, but it still helps to quickly check
+    # what position the child is and the whole codebase is with the variable, so changing all would be unhelpful
     def verify_and_add_token(self, index, my_node):
         val = my_node.parse()
         if val is None:
@@ -589,11 +602,16 @@ class AbstractNode():
         else:
             return False
 
+    # iterate the global cursor. To allow the nodes to all get access easily to the global variable, this
+    # is the only way (with reset) to influence the cursor
     def iterate_cursor(self):
         global cursor
         cursor += 1
         return True
 
+    # essentially verifies if the current token is equal to the string and if yes, iterates the cursor and
+    # return true, else false. In the past a generic node with the name of the token would be added, but to keep
+    # less in memory and keep it still compatible, it appends None instead.
     def verify_and_add_non_token_node(self, index, string):
         if self.get_token() == string:
             self.nodes.append(None)
@@ -602,15 +620,22 @@ class AbstractNode():
         else:
             return False
 
+    # passes 2 list to a node to make it verify if an id was declared and/or assigned. If an id was not assigned and
+    # its value is being set to a variable it exits, same for undeclared. When an id is shown to be declared,
+    # it is appended to the decl_list for future nodes and same behaviour for the assign_list. the lists are pasded in
+    # modification made by the node if applies and returns the modified lists.
     def check_scope(self, decl_list, assign_list):
         for child in self.nodes:
             if child is not None:
                 decl_list, assign_list = child.check_scope(decl_list, assign_list)
         return decl_list, assign_list
 
+    # the parser works by encapsulating a full line in an if statement. for all nodes, that need to be applied, the
+    # verify_and_add_token function will be with the correct node initialised in the fun call. Then verify_and_add_token
+    # method will call parse on it and start the same process for the children. This is recursive and is started
+    # by calling parse on the program node that is created in parse_and_execute().
     def parse(self):
-        return True
-
+        pass
 
 
 class BasicNode(AbstractNode):
@@ -633,16 +658,6 @@ class BasicNode(AbstractNode):
             return False
 
 
-
-
-
-
-
-
-
-
-
-
 """
 Entering the nodes of the parser. We tried really hard to not make it only one file, we were thinking about 
 having a second file that would be sent the parsing code, which then would be accessed, parsed, ran and 
@@ -663,16 +678,6 @@ that need to be accessed by reference which isn't possible by simple import as t
 tl:dr: couldn't find a way to seperate all the code in folders, so heres a block of text
 and end-lines instead. Sorry, we really put some time to thought into it and left residual code as a proof.
 """
-
-
-
-
-
-
-
-
-
-
 
 
 class ProgramNode(AbstractNode):
@@ -719,6 +724,11 @@ class BlockNode(AbstractNode):
         assign_list.pop()
         return decl_list, assign_list
 
+    # Takes a snapshot of the scope before running the block and sets makes it so that all
+    # the variables redeclared flag to false, then runs the block. every declared variables in the block will
+    # have the according variable have a redeclared flag set to true. after running, those variable, whether it
+    # was existent before the scope or not, will be removed from the scope. Then all the variables that were
+    # redeclared are changed to the original values and redeclared state from the snapshot, the rest kept unchanged.
     def run(self):
 
         self.scope = CURRENT_SCOPE.copy()
@@ -743,11 +753,14 @@ class BlockNode(AbstractNode):
 
         CURRENT_SCOPE = temp_scope
 
-
         # for all keys that were removed or are now nonexistent, replace them with original if they exist
         for key in self.scope:
             if key not in list(CURRENT_SCOPE.keys()):
                 CURRENT_SCOPE[key] = self.scope[key]
+        for key in CURRENT_SCOPE:
+            if self.scope[key]["redeclared"]:
+                CURRENT_SCOPE[key]["redeclared"] = True
+
 
     def name(self):
         return "Block"
@@ -838,7 +851,8 @@ class StmtNode(AbstractNode):
         if self.option == 0 and any(str(self.nodes[0].get_id() in subl for subl in decl_list)):
             ids = self.nodes[2].get_Ids([])
             if all((item or any(item in sub_assign_list
-                                for sub_assign_list in assign_list)) for item in ids):  # item cannot be 1 or 0 as it will be rejected
+                                for sub_assign_list in assign_list)) for item in
+                   ids):  # item cannot be 1 or 0 as it will be rejected
                 next(reversed(assign_list)).append(self.nodes[0].get_id())
                 return decl_list, assign_list
 
@@ -856,7 +870,7 @@ class StmtNode(AbstractNode):
     def check_semantics(self):
         if self.option == 0:
             if not ((self.nodes[0].get_type(None) == "int" and
-                self.nodes[2].get_type(self.nodes[0].get_type(None)) == "int") \
+                     self.nodes[2].get_type(self.nodes[0].get_type(None)) == "int") \
                     or (self.nodes[0].get_type(None) == "double"
                         and (self.nodes[2].get_type == "int"
                              or self.nodes[2].get_type(self.nodes[0].get_type(None)) == "double")) \
@@ -887,7 +901,7 @@ class StmtNode(AbstractNode):
 
         elif self.option == 3:
             while bool(self.nodes[2].get_value()):
-                    self.nodes[4].run()
+                self.nodes[4].run()
         elif self.option == 4:
             self.nodes[0].run()
 
@@ -947,7 +961,6 @@ class StmtNode(AbstractNode):
 
 class IDNode(AbstractNode):
 
-
     def get_Ids(self, id_list):
         return id_list.append(self.get_id())
 
@@ -993,6 +1006,7 @@ class LocNode(AbstractNode):
 
     def get_Ids(self, my_list):
         return my_list.append(self.nodes[0].get_id())
+
     def get_id(self):
         return self.nodes[0].get_id()
 
@@ -1035,7 +1049,7 @@ class BoolNode(AbstractNode):
             if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-               raise  Exception("bool issue")
+                raise Exception("bool issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1066,11 +1080,11 @@ class BoolClNode(AbstractNode):
                     self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-               raise  Exception("boolCl issue")
+                raise Exception("boolCl issue")
         elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
-           raise  Exception("boolCl issue")
+            raise Exception("boolCl issue")
 
     def get_value(self):
         if len(self.nodes) == 3:
@@ -1099,7 +1113,7 @@ class JoinNode(AbstractNode):
             if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-               raise  Exception("join issue")
+                raise Exception("join issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1129,11 +1143,11 @@ class JoinClNode(AbstractNode):
                     self.check_childs(1, "bool", ob_type) and self.check_childs(2, "bool", ob_type)):
                 return "bool"
             else:
-               raise  Exception("boolCl issue")
+                raise Exception("boolCl issue")
         elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
-           raise  Exception("joinCl issue")
+            raise Exception("joinCl issue")
 
     def get_value(self):
         if len(self.nodes) == 3:
@@ -1165,7 +1179,7 @@ class EqualityNode(AbstractNode):
                     or (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type))):
                 return "bool"
             else:
-               raise  Exception("rel issue")
+                raise Exception("rel issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1245,7 +1259,7 @@ class RelNode(AbstractNode):
                     and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
                 return "bool"
             else:
-               raise  Exception("rel issue")
+                raise Exception("rel issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1281,7 +1295,7 @@ class RelTailNode(AbstractNode):
         if (ob_type == "bool") and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
             return self.get_child_type(1, ob_type)
         else:
-           raise  Exception("rel tail issue")
+            raise Exception("rel tail issue")
 
     def get_value(self):
         val = self.nodes[1].get_value()
@@ -1511,11 +1525,7 @@ class UnaryNode(AbstractNode):
 
 
 class FactorNode(AbstractNode):
-
-
     reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double"}
-
-
 
     def get_Ids(self, id_list):
         if self.option == 2:

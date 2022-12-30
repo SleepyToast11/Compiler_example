@@ -1,13 +1,10 @@
 {
-rover = printMap ; 
-
-rover = canGoRight ;
-if ( systemBool ) 
-    rover = goRight ;
-
-rover = canGoUp ;
-if ( systemBool ) 
-    rover = goUp ;    
-
-rover = printMap ;
+    int i ;
+    i = 3 ; 
+    while ( i > 0 ) 
+    {
+    systemInt = i ; 
+    i = i - 1 ;
+    rover = printInt ;
+    }
 }
