@@ -76,6 +76,20 @@ class Rover():
     def print_int(self):
         print(self.global_sco["systemInt"]["value"])
 
+    def print_bool(self):
+        print(self.global_sco["systemBool"]["value"])
+
+    def print_map(self):
+        print("X pos" +str(self.x))
+        print("Y pos" + str(self.y))
+        for i in range(len(self.r_map)):
+            for j in range(len(self.r_map[i])):
+                if j == self.y and i == self.x:
+                    print("R", end=" ")
+                else:
+                    print(str(self.r_map[i][j]), end=" ")
+            print()
+
     global_sco = {
         "rover": {"value": None, "type": "rover"}
         , "systemInt": {"value": 0, "type": "int"}
@@ -101,6 +115,16 @@ class Rover():
         elif var == "printInt"  :
             if inner == "value":
                 return self.print_int()
+            else:
+                return "rover"
+        elif var == "printBool"  :
+            if inner == "value":
+                return self.print_bool()
+            else:
+                return "rover"
+        elif var == "printMap"  :
+            if inner == "value":
+                return self.print_map()
             else:
                 return "rover"
         elif var == "goRight"   :
@@ -182,10 +206,11 @@ class Rover():
             , "goRight"
             , "printInt"
             , "printBool"
+            , "printMap"
             , "goUp"
             , "goLeft"
             , "goDown"
-            , "canGoRightpe"
+            , "canGoRight"
             , "canGoUp"
             , "canGoLeft"
             , "canGoDown"
@@ -350,25 +375,25 @@ class Rover():
     def can_go_right(self):
         canTurn = False
         if self.orientation==NORTH:          
-            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
+            if self.x >= 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
                 self.set_global_value("systemBool", "value", False)
         elif self.orientation==EAST:
-            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
+            if self.x >= 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
                self.set_global_value("systemBool", "value", False)
         elif self.orientation == SOUTH:
-            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
+            if self.x >= 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
                self.set_global_value("systemBool", "value", False)
         elif self.orientation==WEST:
-            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
+            if self.x >= 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
                 self.set_global_value("systemBool", "value", True)
             else:
@@ -717,12 +742,10 @@ class BlockNode(AbstractNode):
 
         CURRENT_SCOPE = temp_scope
 
-        # get all non redeclared keys
-        keys = CURRENT_SCOPE.keys()
 
         # for all keys that were removed or are now nonexistent, replace them with original if they exist
         for key in self.scope:
-            if key not in keys:
+            if key not in list(CURRENT_SCOPE.keys()):
                 CURRENT_SCOPE[key] = self.scope[key]
 
     def name(self):
