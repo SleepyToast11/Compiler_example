@@ -61,7 +61,9 @@ def get_command(rover_name):
 
 class Rover():
     def __init__(self, name, the_map):
-        self._map = the_map
+        for i in range(len(the_map) - 1):
+            the_map[i] = [i for i in the_map[i]]
+        self.r_map = the_map.copy()
         self.ground_memo = the_map.copy()
         self.name = name
         self.x, self.y = self.spawn()
@@ -100,20 +102,20 @@ class Rover():
                     self.print(traceback.format_exc())
                 finally:
                     self.print("Finished running command.\n\n")
-    
+
     def spawn(self):
       # Find an empty spot on the map to spawn the robot
-      self.x, self.y=0,0
+      x, y = 0, 0
       found = False
       while not found:
-        self.x = random.randint(0, len(self._map) - 1)
-        self.y = random.randint(0, len(self._map[0]) - 1)
-        if self._map [self.x][self.y] == ' ':
+        x = random.randint(0, len(self.r_map) - 1)
+        y = random.randint(0, len(self.r_map[0]) - 1)
+        if self.r_map [x][y] == ' ':
           found = True
 
       # Set the robot's starting position
-      self._map[self.x][self.y] = "S"
-      return self.x, self.y
+      self.r_map[x][y] = "S"
+      return x, y
       
     
     def go_up(self):
@@ -174,33 +176,33 @@ class Rover():
         
     
     def dig(self):
-      if self._map[self.x-1][self.y] == 'D':
+      if self.r_map[self.x-1][self.y] == 'D':
         print("digging.............")  
-        self._map[self.x-1][self.y] = 'T'
+        self.r_map[self.x-1][self.y] = 'T'
         print("treasure was taken")
-      elif self._map[self.x+1][self.y] == 'D':
+      elif self.r_map[self.x+1][self.y] == 'D':
         print("digging.............")  
-        self._map[self.x+1][self.y] = 'T'
+        self.r_map[self.x+1][self.y] = 'T'
         print("treasure was taken")
-      elif self._map[self.x][self.y+1] == 'D':
+      elif self.r_map[self.x][self.y+1] == 'D':
         print("digging.............")  
-        self._map[self.x][self.y+1] = 'T'
+        self.r_map[self.x][self.y+1] = 'T'
         print("treasure was taken") 
-      elif self._map[self.x][self.y-1] == 'D':
+      elif self.r_map[self.x][self.y-1] == 'D':
         print("digging.............")  
-        self._map[self.x][self.y-1] = 'T'
+        self.r_map[self.x][self.y-1] = 'T'
         print("treasure was taken")         
       else:
           print("you can't dig here")
     
     def info(self):
-      for i in range(len(self._map)):
-       for j in range(len(self._map[i])):
-        if self._map [i][j] == 'R':
-          self._map [i][j] = ''
+      for i in range(len(self.r_map)):
+       for j in range(len(self.r_map[i])):
+        if self.r_map [i][j] == 'R':
+          self.r_map [i][j] = ''
       
-      self._map [self.x][self.y]=robot
-      for row in self._map :
+      self.r_map [self.x][self.y]=robot
+      for row in self.r_map :
           print(''.join(row))
       print("the orientation is: ")
       if self.orientation==1:
@@ -218,25 +220,25 @@ class Rover():
     def can_go_right(self):
         canTurn = False
         if self.orientation==NORTH:          
-            if self.x > 0 and self._map[self.x][self.y+1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                 GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==EAST:
-            if self.x > 0 and self._map[self.x+1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation == SOUTH:
-            if self.x > 0 and self._map[self.x][self.y-1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==WEST:
-            if self.x > 0 and self._map[self.x-1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
@@ -247,25 +249,25 @@ class Rover():
     def can_go_left(self):
         canTurn = False
         if self.orientation==NORTH:          
-         if self.x > 0 and self._map[self.x][self.y-1] != 'X':
+         if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
              canTurn = True
              GLOBAL_SCOPE["systemBool"]["value"] = True
          else:
             GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==EAST:
-            if self.x > 0 and self._map[self.x-1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==SOUTH:
-            if self.x > 0 and self._map[self.x][self.y+1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==WEST:
-            if self.x > 0 and self._map[self.x+1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
@@ -275,25 +277,25 @@ class Rover():
     def can_go_up(self):
         canTurn = False
         if self.orientation==NORTH:          
-         if self.x > 0 and self._map[self.x-1][self.y] != 'X':
+         if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
              canTurn = True
              GLOBAL_SCOPE["systemBool"]["value"] = True
          else:
             GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==EAST:
-            if self.x > 0 and self._map[self.x][self.y+1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==SOUTH:
-            if self.x > 0 and self._map[self.x+1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==WEST:
-            if self.x > 0 and self._map[self.x][self.y-1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
@@ -303,25 +305,25 @@ class Rover():
     def can_go_down(self):
         canTurn = False
         if self.orientation==NORTH:          
-         if self.x > 0 and self._map[self.x+1][self.y] != 'X':
+         if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
              canTurn = True
              GLOBAL_SCOPE["systemBool"]["value"] = True
          else:
             GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==EAST:
-            if self.x > 0 and self._map[self.x][self.y-1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==SOUTH:
-            if self.x > 0 and self._map[self.x-1][self.y] != 'X':
+            if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
                GLOBAL_SCOPE["systemBool"]["value"] = False
         elif self.orientation==WEST:
-            if self.x > 0 and self._map[self.x][self.y+1] != 'X':
+            if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
                 GLOBAL_SCOPE["systemBool"]["value"] = True
             else:
@@ -366,17 +368,19 @@ class Rover():
 
 
 
-rover = None
+rover = Rover
 def main():
     # Initialize the rovers
     if len(sys.argv) < 1:
         raise Exception("Missing file path to parse.")
 
     my_map = []
-    filepath = pathlib.Path(sys.argv[1])
+    filepath = pathlib.Path("map.txt")  #filepath = pathlib.Path(sys.argv[1])
     with filepath.open() as f:
         my_map = f.readlines()
-        ground_memo = f.readlines()
+
+    for i in range(len(my_map)-1):
+        my_map [i] = my_map[i].replace('\n', '')
 
     global rover
     rover = Rover(ROVER_1, my_map)
