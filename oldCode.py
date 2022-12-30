@@ -1,5 +1,5 @@
 # Jerome Sparnaay, Muhi Eddin Tahhan
-from satelite import (AbstractNode, GLOBAL_SCOPE, CURRENT_SCOPE)
+from rover import (AbstractNode, GLOBAL_SCOPE, CURRENT_SCOPE)
 
 
 class BasicNode(AbstractNode):
