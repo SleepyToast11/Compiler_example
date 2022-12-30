@@ -542,6 +542,7 @@ class AbstractNode():
     def check_childs(self, index, ob_type, superType):
         return self.nodes[index].get_type(superType) == ob_type
 
+
     def get_type(self, ob_type):
         pass
 
