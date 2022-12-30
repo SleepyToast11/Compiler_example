@@ -443,7 +443,7 @@ class AbstractNode():
 
 
     def check_childs(self, index, ob_type, superType):
-        return self.nodes[index].get_types(superType) == ob_type
+        return self.nodes[index].get_type(superType) == ob_type
 
     def get_type(self, ob_type):
         pass
@@ -475,6 +475,7 @@ class AbstractNode():
     def reset(self):
         global cursor
         cursor = self.initial_cursor
+        self.nodes = []
         return True
 
     def get_token(self):
@@ -768,7 +769,7 @@ class StmtNode(AbstractNode):
                 raise Exception("bad typing")
 
         elif self.option == 1 or self.option == 2 or self.option == 3:
-            if self.nodes[2].get_type() != "bool":
+            if self.nodes[2].get_type("bool") != "bool":
                 raise Exception("bad typing")
 
         elif self.option == 4:
@@ -789,8 +790,8 @@ class StmtNode(AbstractNode):
                 self.nodes[4].run()
 
         elif self.option == 3:
-            while self.nodes[2].get_value():
-                self.nodes[4].run()
+            while bool(self.nodes[2].get_value()):
+                    self.nodes[4].run()
         elif self.option == 4:
             self.nodes[0].run()
 
@@ -1115,7 +1116,8 @@ class EqualityClNode(AbstractNode):
             elif op == "!=":
                 return self.nodes[1].get_value() != val, self.option
         else:
-            return self.nodes[1].get_value(), self.option
+            val = self.nodes[1].get_value()
+            return val, self.option
 
     def name(self):
         return "EqualityCl"
@@ -1185,7 +1187,8 @@ class RelTailNode(AbstractNode):
            raise  Exception("rel tail issue")
 
     def get_value(self):
-        return self.nodes[1].get_value(), self.option
+        val = self.nodes[1].get_value()
+        return val, self.option
 
     def name(self):
         return "RelTail"
@@ -1432,7 +1435,14 @@ class FactorNode(AbstractNode):
         elif self.option == 1:
             return self.nodes[0].get_value()
         else:
-            return self.val
+            if self.ob_type == "bool":
+                return bool(self.val)
+            if self.ob_type == "int":
+                return int(self.val)
+            if self.ob_type == "double":
+                return float(self.val)
+            else:
+                return float(self.val)
 
     def get_type(self, ob_type):
         if self.option == 2:
