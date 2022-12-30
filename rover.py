@@ -73,6 +73,9 @@ class Rover():
         self.x, self.y = self.spawn()
         self.orientation=NORTH
 
+    def print_int(self):
+        print(self.global_sco["systemInt"]["value"])
+
     global_sco = {
         "rover": {"value": None, "type": "rover"}
         , "systemInt": {"value": 0, "type": "int"}
@@ -80,25 +83,92 @@ class Rover():
 
     def get_global_value(self, var, inner):
 
-        global_sco = {
-        "rover": {"value": None, "type": "rover"}
-        , "systemInt": {"value": 0, "type": "int"}
-        , "systemBool": {"value": False, "type": "bool"}
-        , "goRight": {"value": self.go_right(), "type": "rover"}
-        , "goUp": {"value": self.go_up(), "type": "rover"}
-        , "goLeft": {"value": self.go_left(), "type": "rover"}
-        , "goDown": {"value": self.go_down(), "type": "rover"}
-        , "canGoRight": {"value": self.can_go_right(), "type": "rover"}
-        , "canGoUp": {"value": self.can_go_up(), "type": "rover"}
-        , "canGoLeft": {"value": self.can_go_left(), "type": "rover"}
-        , "canGoDown": {"value": self.can_go_down(), "type": "rover"}
-        , "getGround": {"value": self.get_ground(), "type": "rover"}
-        , "setGround": {"value": self.set_ground(), "type": "rover"}
-        , "dig": {"value": self.dig(), "type": "rover"}
-        , "turnRight": {"value": self.turn_right(), "type": "rover"}
-        , "turnLeft": {"value": self.turn_left(), "type": "rover"}
-    }
-        return global_sco[var][inner]
+        if var == "rover":
+            if inner  == "value":
+                return None
+            else:
+                return "rover"
+        elif var == "systemInt" :
+            if inner == "value":
+                return self.global_sco["systemInt"]["value"]
+            else:
+                return "int"
+        elif var == "systemBool":
+            if inner == "value":
+                return self.global_sco["systemBool"]["value"]
+            else:
+                return "bool"
+        elif var == "printInt"  :
+            if inner == "value":
+                return self.print_int()
+            else:
+                return "rover"
+        elif var == "goRight"   :
+            if inner == "value":
+                return self.go_right()
+            else:
+                return "rover"
+        elif var == "goUp"      :
+            if inner == "value":
+                return self.go_up()
+            else:
+                return "rover"
+        elif var == "goLeft"    :
+            if inner == "value":
+                return self.go_left()
+            else:
+                return "rover"
+        elif var == "goDown"    :
+            if inner == "value":
+                return self.go_down()
+            else:
+                return "rover"
+        elif var == "canGoRight":
+            if inner == "value":
+                return self.can_go_right()
+            else:
+                return "rover"
+        elif var == "canGoUp":
+            if inner == "value":
+                return self.can_go_up()
+            else:
+                return "rover"
+        elif var == "canGoLeft":
+            if inner == "value":
+                return self.can_go_left()
+            else:
+              return "rover"
+        elif var == "canGoDown":
+            if inner == "value":
+                return self.can_go_down()
+            else:
+                return "rover"
+        elif var == "getGround":
+            if inner == "value":
+                return self.get_ground()
+            else:
+              return "rover"
+        elif var == "setGround":
+            if inner == "value":
+                return self.set_ground()
+            else:
+                return "rover"
+        elif var == "dig":
+            if inner == "value":
+                return self.dig()
+            else:
+                return "rover"
+        elif var == "turnRight":
+            if inner == "value":
+                return self.turn_right()
+            else:
+                return "rover"
+        elif var == "turnLeft":
+            if inner == "value":
+                return self.turn_left()
+            else:
+                return "rover"
+
 
     def set_global_value(self, var, inner, value):
         self.global_sco[var][inner] = value
@@ -110,6 +180,8 @@ class Rover():
             , "systemInt"
             , "systemBool"
             , "goRight"
+            , "printInt"
+            , "printBool"
             , "goUp"
             , "goLeft"
             , "goDown"
@@ -625,7 +697,7 @@ class BlockNode(AbstractNode):
 
         self.scope = CURRENT_SCOPE.copy()
 
-        for key in CURRENT_SCOPE.keys():
+        for key in list(CURRENT_SCOPE.keys()):
             CURRENT_SCOPE[key]["redeclared"] = False
 
         for child in self.nodes:
@@ -869,7 +941,8 @@ class IDNode(AbstractNode):
     def set_value(self, value):
         if self.get_id() in rover.get_keys():
             rover.set_global_value(self.get_id(), "value", value)
-        CURRENT_SCOPE[self.get_id()]["value"] = value
+        else:
+            CURRENT_SCOPE[self.get_id()]["value"] = value
 
     def get_type(self, ob_type):
         if self.get_id() in rover.get_keys():
@@ -1442,7 +1515,10 @@ class FactorNode(AbstractNode):
             if self.ob_type == "double":
                 return float(self.val)
             else:
-                return float(self.val)
+                if self.val == "True" or self.val == "False":
+                    return bool(self.val)
+                else:
+                    return float(self.val)
 
     def get_type(self, ob_type):
         if self.option == 2:

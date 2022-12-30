@@ -1,6 +1,10 @@
 {
-	int i ;
-	i = 5 ;
-	while ( i > 0 ) 
-        i = i - 1 ;
+    int i ;
+    i = 3 ; 
+    while ( i > 0 ) 
+    {
+    systemInt = i ; 
+    i = i - 1 ;
+    rover = printInt ;
+    }
 }
