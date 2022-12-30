@@ -105,31 +105,33 @@ class Rover():
 
 
     def get_keys(self):
-        global_sco = {
-            "rover": {"value": None, "type": "rover"}
-            , "systemInt": {"value": 0, "type": "int"}
-            , "systemBool": {"value": False, "type": "bool"}
-            , "goRight": {"value": self.go_right(), "type": "rover"}
-            , "goUp": {"value": self.go_up(), "type": "rover"}
-            , "goLeft": {"value": self.go_left(), "type": "rover"}
-            , "goDown": {"value": self.go_down(), "type": "rover"}
-            , "canGoRight": {"value": self.can_go_right(), "type": "rover"}
-            , "canGoUp": {"value": self.can_go_up(), "type": "rover"}
-            , "canGoLeft": {"value": self.can_go_left(), "type": "rover"}
-            , "canGoDown": {"value": self.can_go_down(), "type": "rover"}
-            , "getGround": {"value": self.get_ground(), "type": "rover"}
-            , "setGround": {"value": self.set_ground(), "type": "rover"}
-            , "dig": {"value": self.dig(), "type": "rover"}
-            , "turnRight": {"value": self.turn_right(), "type": "rover"}
-            , "turnLeft": {"value": self.turn_left(), "type": "rover"}
-        }
+        global_sco = [
+            "rover"
+            , "systemInt"
+            , "systemBool"
+            , "goRight"
+            , "goUp"
+            , "goLeft"
+            , "goDown"
+            , "canGoRightpe"
+            , "canGoUp"
+            , "canGoLeft"
+            , "canGoDown"
+            , "getGround"
+            , "setGround"
+            , "dig"
+            , "turnRight"
+            , "turnLeft"
+        ]
 
-        return global_sco.keys()
+        return global_sco
     def print(self, msg):
         print(f"{self.name}: {msg}")
 
     def parse_and_execute_cmd(self, command):
         self.print(f"Running command: {command}")
+        command = " ".join(command.split())
+
         ROVER_COMMAND["code"] = command.split()
         global cursor
         cursor = 0
@@ -139,6 +141,7 @@ class Rover():
         program.check_scope(None, None)
         program.check_semantics()
         program.run()
+
 
 
     def wait_for_command(self):
@@ -428,12 +431,16 @@ rover = Rover("a" ,[[' ']])
 
 
 class AbstractNode():
-    scope = {}
-    option = None
 
     def __init__(self):
         self.initial_cursor = cursor
         self.nodes = []
+        self.option = None
+        self.types = []
+        self.val = None
+        self.value = ""
+        self.ob_type = ""
+
 
     def check_childs(self, index, ob_type, superType):
         return self.nodes[index].get_types(superType) == ob_type
@@ -457,7 +464,9 @@ class AbstractNode():
     def get_Ids(self, list):
         for child in self.nodes:
             if child is not None:
-                list = child.get_Ids(list)
+                il = child.get_Ids(list)
+                if il is not None:
+                    list.append(child.get_Ids(list))
         return list
 
     def name(self):
@@ -487,7 +496,7 @@ class AbstractNode():
         return True
 
     def verify_and_add_non_token_node(self, index, string):
-        if self.get_token() is string:
+        if self.get_token() == string:
             self.nodes.append(None)
             self.iterate_cursor()
             return True
@@ -626,10 +635,14 @@ class BlockNode(AbstractNode):
 
     def end_of_block_scope(self):
 
+        global CURRENT_SCOPE
+        temp_scope = {}
         # remove all redeclared arguments
         for key in CURRENT_SCOPE:
-            if CURRENT_SCOPE[key]["redeclared"]:
-                del CURRENT_SCOPE[key]
+            if not CURRENT_SCOPE[key]["redeclared"]:
+                temp_scope[key] = CURRENT_SCOPE[key]
+
+        CURRENT_SCOPE = temp_scope
 
         # get all non redeclared keys
         keys = CURRENT_SCOPE.keys()
@@ -725,11 +738,10 @@ class StmtNode(AbstractNode):
 
     def check_scope(self, decl_list, assign_list):
 
-        if self.option == 0 and self.nodes[0].get_id() in decl_list:
+        if self.option == 0 and any(str(self.nodes[0].get_id() in subl for subl in decl_list)):
             ids = self.nodes[2].get_Ids([])
             if all((item or any(item in sub_assign_list
-                                for sub_assign_list in assign_list)) for item in
-                   ids):  # item cannot be 1 or 0 as it will be rejected
+                                for sub_assign_list in assign_list)) for item in ids):  # item cannot be 1 or 0 as it will be rejected
                 next(reversed(assign_list)).append(self.nodes[0].get_id())
                 return decl_list, assign_list
 
@@ -746,13 +758,13 @@ class StmtNode(AbstractNode):
 
     def check_semantics(self):
         if self.option == 0:
-            if not (self.nodes[0].get_type(None) == "int"
-                    and self.nodes[2].get_type(self.nodes[0].get_type(None)) == "int") \
+            if not ((self.nodes[0].get_type(None) == "int" and
+                self.nodes[2].get_type(self.nodes[0].get_type(None)) == "int") \
                     or (self.nodes[0].get_type(None) == "double"
                         and (self.nodes[2].get_type == "int"
                              or self.nodes[2].get_type(self.nodes[0].get_type(None)) == "double")) \
                     or (self.nodes[0].get_type(None) ==
-                        self.nodes[2].get_type(self.nodes[2].get_type(self.nodes[0].get_type(None)))):
+                        self.nodes[2].get_type(self.nodes[0].get_type(None)))):
                 raise Exception("bad typing")
 
         elif self.option == 1 or self.option == 2 or self.option == 3:
@@ -837,7 +849,7 @@ class StmtNode(AbstractNode):
 
 
 class IDNode(AbstractNode):
-    value = ""
+
 
     def get_Ids(self, id_list):
         return id_list.append(self.get_id())
@@ -881,11 +893,16 @@ class IDNode(AbstractNode):
 
 class LocNode(AbstractNode):
 
+    def get_Ids(self, my_list):
+        return my_list.append(self.nodes[0].get_id())
+    def get_id(self):
+        return self.nodes[0].get_id()
+
     def get_value(self):
         return self.nodes[0].get_value()
 
-    def set_value(self, value, scope):
-        return self.nodes[0].set_value(value, scope)
+    def set_value(self, value):
+        return self.nodes[0].set_value(value)
 
     def get_type(self, ob_type):
         return self.nodes[0].get_type(ob_type)
@@ -920,7 +937,7 @@ class BoolNode(AbstractNode):
             if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-                Exception("bool issue")
+               raise  Exception("bool issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -951,11 +968,11 @@ class BoolClNode(AbstractNode):
                     self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-                Exception("boolCl issue")
+               raise  Exception("boolCl issue")
         elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
-            Exception("boolCl issue")
+           raise  Exception("boolCl issue")
 
     def get_value(self):
         if len(self.nodes) == 3:
@@ -984,7 +1001,7 @@ class JoinNode(AbstractNode):
             if ob_type == "bool" and (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type)):
                 return "bool"
             else:
-                Exception("join issue")
+               raise  Exception("join issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1014,11 +1031,11 @@ class JoinClNode(AbstractNode):
                     self.check_childs(1, "bool", ob_type) and self.check_childs(2, "bool", ob_type)):
                 return "bool"
             else:
-                Exception("boolCl issue")
+               raise  Exception("boolCl issue")
         elif self.check_childs(1, "bool", ob_type):
             return "bool"
         else:
-            Exception("joinCl issue")
+           raise  Exception("joinCl issue")
 
     def get_value(self):
         if len(self.nodes) == 3:
@@ -1050,7 +1067,7 @@ class EqualityNode(AbstractNode):
                     or (self.check_childs(0, "bool", ob_type) and self.check_childs(1, "bool", ob_type))):
                 return "bool"
             else:
-                Exception("rel issue")
+               raise  Exception("rel issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1129,7 +1146,7 @@ class RelNode(AbstractNode):
                     and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
                 return "bool"
             else:
-                Exception("rel issue")
+               raise  Exception("rel issue")
         else:
             return self.get_child_type(0, ob_type)
 
@@ -1165,7 +1182,7 @@ class RelTailNode(AbstractNode):
         if (ob_type == "bool") and (self.check_childs(1, "int", ob_type) or self.check_childs(1, "double", ob_type)):
             return self.get_child_type(1, ob_type)
         else:
-            Exception("rel tail issue")
+           raise  Exception("rel tail issue")
 
     def get_value(self):
         return self.nodes[1].get_value(), self.option
@@ -1394,13 +1411,11 @@ class UnaryNode(AbstractNode):
 
 
 class FactorNode(AbstractNode):
-    reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double", "=", "True", "False"}
 
-    types = []
 
-    ob_type = ""
+    reserved_symbole = {"{", "}", "[", "]", ";", "int", "bool", "char", "double"}
 
-    val = None
+
 
     def get_Ids(self, id_list):
         if self.option == 2:
