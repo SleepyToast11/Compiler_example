@@ -63,6 +63,7 @@ def get_command(rover_name):
 
 class Rover():
 
+
     def __init__(self, name, the_map):
         for i in range(len(the_map) - 1):
             the_map[i] = [i for i in the_map[i]]
@@ -72,9 +73,14 @@ class Rover():
         self.x, self.y = self.spawn()
         self.orientation=NORTH
 
-    def get_global(self):
+    global_sco = {
+        "rover": {"value": None, "type": "rover"}
+        , "systemInt": {"value": 0, "type": "int"}
+        , "systemBool": {"value": False, "type": "bool"}}
 
-        return {
+    def get_global_value(self, var, inner):
+
+        global_sco = {
         "rover": {"value": None, "type": "rover"}
         , "systemInt": {"value": 0, "type": "int"}
         , "systemBool": {"value": False, "type": "bool"}
@@ -92,6 +98,33 @@ class Rover():
         , "turnRight": {"value": self.turn_right(), "type": "rover"}
         , "turnLeft": {"value": self.turn_left(), "type": "rover"}
     }
+        return global_sco[var][inner]
+
+    def set_global_value(self, var, inner, value):
+        self.global_sco[var][inner] = value
+
+
+    def get_keys(self):
+        global_sco = {
+            "rover": {"value": None, "type": "rover"}
+            , "systemInt": {"value": 0, "type": "int"}
+            , "systemBool": {"value": False, "type": "bool"}
+            , "goRight": {"value": self.go_right(), "type": "rover"}
+            , "goUp": {"value": self.go_up(), "type": "rover"}
+            , "goLeft": {"value": self.go_left(), "type": "rover"}
+            , "goDown": {"value": self.go_down(), "type": "rover"}
+            , "canGoRight": {"value": self.can_go_right(), "type": "rover"}
+            , "canGoUp": {"value": self.can_go_up(), "type": "rover"}
+            , "canGoLeft": {"value": self.can_go_left(), "type": "rover"}
+            , "canGoDown": {"value": self.can_go_down(), "type": "rover"}
+            , "getGround": {"value": self.get_ground(), "type": "rover"}
+            , "setGround": {"value": self.set_ground(), "type": "rover"}
+            , "dig": {"value": self.dig(), "type": "rover"}
+            , "turnRight": {"value": self.turn_right(), "type": "rover"}
+            , "turnLeft": {"value": self.turn_left(), "type": "rover"}
+        }
+
+        return global_sco.keys()
     def print(self, msg):
         print(f"{self.name}: {msg}")
 
@@ -100,7 +133,6 @@ class Rover():
         ROVER_COMMAND["code"] = command.split()
         global cursor
         cursor = 0
-        global CURRENT_SCOPE
         CURRENT_SCOPE = {}
         program = ProgramNode()
         program.parse()
@@ -242,31 +274,30 @@ class Rover():
 
     def can_go_right(self):
         canTurn = False
-        global GLOBAL_SCOPE
         if self.orientation==NORTH:          
             if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-                GLOBAL_SCOPE["systemBool"]["value"] = False
+                self.set_global_value("systemBool", "value", False)
         elif self.orientation==EAST:
             if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation == SOUTH:
             if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==WEST:
             if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         return canTurn
 
     # noinspection PyTypeChecker
@@ -275,27 +306,27 @@ class Rover():
         if self.orientation==NORTH:          
          if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
              canTurn = True
-             GLOBAL_SCOPE["systemBool"]["value"] = True
+             self.set_global_value("systemBool", "value", True)
          else:
-            GLOBAL_SCOPE["systemBool"]["value"] = False
+            self.set_global_value("systemBool", "value", False)
         elif self.orientation==EAST:
             if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==SOUTH:
             if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==WEST:
             if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def can_go_up(self):
@@ -303,27 +334,27 @@ class Rover():
         if self.orientation==NORTH:          
          if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
              canTurn = True
-             GLOBAL_SCOPE["systemBool"]["value"] = True
+             self.set_global_value("systemBool", "value", True)
          else:
-            GLOBAL_SCOPE["systemBool"]["value"] = False
+            self.set_global_value("systemBool", "value", False)
         elif self.orientation==EAST:
             if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==SOUTH:
             if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==WEST:
             if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def can_go_down(self):
@@ -331,27 +362,27 @@ class Rover():
         if self.orientation==NORTH:          
          if self.x > 0 and self.r_map[self.x+1][self.y] != 'X':
              canTurn = True
-             GLOBAL_SCOPE["systemBool"]["value"] = True
+             self.set_global_value("systemBool", "value", True)
          else:
-            GLOBAL_SCOPE["systemBool"]["value"] = False
+            self.set_global_value("systemBool", "value", False)
         elif self.orientation==EAST:
             if self.x > 0 and self.r_map[self.x][self.y-1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==SOUTH:
             if self.x > 0 and self.r_map[self.x-1][self.y] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         elif self.orientation==WEST:
             if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
-                GLOBAL_SCOPE["systemBool"]["value"] = True
+                self.set_global_value("systemBool", "value", True)
             else:
-               GLOBAL_SCOPE["systemBool"]["value"] = False
+               self.set_global_value("systemBool", "value", False)
         return canTurn
 
     def turn_right(self):
@@ -379,7 +410,7 @@ class Rover():
 
     def set_ground(self):
 
-        self.ground_memo[self.x][self.y] = GLOBAL_SCOPE["systemInt"]["value"]
+        self.ground_memo[self.x][self.y] = self.get_global_value("systemInt", "value")
 
     def print_ground(self):
         
@@ -387,11 +418,10 @@ class Rover():
 
     def get_ground(self):
 
-        GLOBAL_SCOPE["systemInt"]["value"] = self.ground_memo[self.x][self.y]
+        self.set_global_value("systemInt", "value", self.ground_memo[self.x][self.y])
 
 
 
-GLOBAL_SCOPE = {}
 rover = Rover("a" ,[[' ']])
 def main():
     # Initialize the rovers
@@ -409,9 +439,7 @@ def main():
     global rover
     rover = Rover(ROVER_1, my_map)
 
-    global GLOBAL_SCOPE
 
-    GLOBAL_SCOPE = rover.get_global()
 
     rover.wait_for_command()
 
@@ -846,22 +874,22 @@ class IDNode(AbstractNode):
         return str(self.value)
 
     def get_value(self):
-        if self.get_id() in GLOBAL_SCOPE.keys():
-            return GLOBAL_SCOPE[self.get_id()]["value"]
+        if self.get_id() in rover.get_keys():
+            return rover.get_global_value(self.get_id(), "value")
         return CURRENT_SCOPE[self.get_id()]["value"]
 
     def set_value(self, value):
-        if self.get_id() in GLOBAL_SCOPE.keys():
-            GLOBAL_SCOPE[self.get_id()]["value"] = value
+        if self.get_id() in rover.get_keys():
+            rover.set_global_value(self.get_id(), "value", value)
         CURRENT_SCOPE[self.get_id()]["value"] = value
 
     def get_type(self, ob_type):
-        if self.get_id() in GLOBAL_SCOPE.keys():
-            return GLOBAL_SCOPE[self.get_id()]["type"]
+        if self.get_id() in rover.get_keys():
+            return rover.get_global_value(self.get_id(), "type")
         return CURRENT_SCOPE[self.get_id()]["type"]
 
     def set_type(self, ob_type):
-        if self.get_id() in GLOBAL_SCOPE.keys():
+        if self.get_id() in rover.get_keys():
             raise Exception("cannot reassign namespace var")
         CURRENT_SCOPE[self.get_id()] = {"redeclared": True, "type": str(ob_type)}
 
@@ -903,8 +931,8 @@ class LocNode(AbstractNode):
                 if my_id == item:
                     return decl_list, assign_list
 
-        for command in GLOBAL_SCOPE.keys():
-            if command == id:
+        for command in rover.get_keys():
+            if command == my_id:
                 return decl_list, assign_list
 
         raise Exception("id not found " + self.nodes[0].get_id())
