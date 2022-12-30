@@ -1,7 +1,6 @@
 import pathlib
 import sys
 
-from rover import ROVER_COMMAND_FILES
 
 
 def main():

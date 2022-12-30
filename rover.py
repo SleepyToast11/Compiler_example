@@ -16,6 +16,8 @@ robot='R'
 
 
 
+
+
 # Rovers that exist
 ROVER_1 = "Rover"
 ROVERS = [
@@ -60,6 +62,7 @@ def get_command(rover_name):
 
 
 class Rover():
+
     def __init__(self, name, the_map):
         for i in range(len(the_map) - 1):
             the_map[i] = [i for i in the_map[i]]
@@ -69,6 +72,26 @@ class Rover():
         self.x, self.y = self.spawn()
         self.orientation=NORTH
 
+    def get_global(self):
+
+        return {
+        "rover": {"value": None, "type": "rover"}
+        , "systemInt": {"value": 0, "type": "int"}
+        , "systemBool": {"value": False, "type": "bool"}
+        , "goRight": {"value": self.go_right(), "type": "rover"}
+        , "goUp": {"value": self.go_up(), "type": "rover"}
+        , "goLeft": {"value": self.go_left(), "type": "rover"}
+        , "goDown": {"value": self.go_down(), "type": "rover"}
+        , "canGoRight": {"value": self.can_go_right(), "type": "rover"}
+        , "canGoUp": {"value": self.can_go_up(), "type": "rover"}
+        , "canGoLeft": {"value": self.can_go_left(), "type": "rover"}
+        , "canGoDown": {"value": self.can_go_down(), "type": "rover"}
+        , "getGround": {"value": self.get_ground(), "type": "rover"}
+        , "setGround": {"value": self.set_ground(), "type": "rover"}
+        , "dig": {"value": self.dig(), "type": "rover"}
+        , "turnRight": {"value": self.turn_right(), "type": "rover"}
+        , "turnLeft": {"value": self.turn_left(), "type": "rover"}
+    }
     def print(self, msg):
         print(f"{self.name}: {msg}")
 
@@ -216,9 +239,10 @@ class Rover():
       
       return self.x, self.y
 
-    # noinspection PyTypeChecker
+
     def can_go_right(self):
         canTurn = False
+        global GLOBAL_SCOPE
         if self.orientation==NORTH:          
             if self.x > 0 and self.r_map[self.x][self.y+1] != 'X':
                 canTurn = True
@@ -367,8 +391,8 @@ class Rover():
 
 
 
-
-rover = Rover
+GLOBAL_SCOPE = {}
+rover = Rover("a" ,[[' ']])
 def main():
     # Initialize the rovers
     if len(sys.argv) < 1:
@@ -385,6 +409,10 @@ def main():
     global rover
     rover = Rover(ROVER_1, my_map)
 
+    global GLOBAL_SCOPE
+
+    GLOBAL_SCOPE = rover.get_global()
+
     rover.wait_for_command()
 
 
@@ -393,24 +421,7 @@ def main():
 if __name__=="__main__":
     main()
 
-GLOBAL_SCOPE = {
-    "rover": {"value": None, "type": "rover"}
-    , "systemInt": {"value": 0, "type": "int"}
-    , "systemBool": {"value": False, "type": "bool"}
-    , "goRight": {"value": rover.go_right(), "type": "rover"}
-    , "goUp": {"value": rover.go_up(), "type": "rover"}
-    , "goLeft": {"value": rover.go_left(), "type": "rover"}
-    , "goDown": {"value": rover.go_down(), "type": "rover"}
-    , "canGoRight": {"value": rover.can_go_right(), "type": "rover"}
-    , "canGoUp": {"value": rover.can_go_up(), "type": "rover"}
-    , "canGoLeft": {"value": rover.can_go_left(), "type": "rover"}
-    , "canGoDown": {"value": rover.can_go_down(), "type": "rover"}
-    , "getGround": {"value": rover.get_ground(), "type": "rover"}
-    , "setGround": {"value": rover.set_ground(), "type": "rover"}
-    , "dig": {"value": rover.dig(), "type": "rover"}
-    , "turnRight": {"value": rover.turn_right(), "type": "rover"}
-    , "turnLeft": {"value": rover.turn_left(), "type": "rover"}
-}
+
 
 
 class AbstractNode():
