@@ -1,0 +1,13 @@
+{
+rover = printMap ; 
+
+rover = canGoRight ;
+if ( systemBool ) 
+    rover = goRight ;
+
+rover = canGoUp ;
+if ( systemBool ) 
+    rover = goUp ;    
+
+rover = printMap ;
+}
