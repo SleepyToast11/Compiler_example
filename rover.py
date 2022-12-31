@@ -5,6 +5,7 @@ import time
 import traceback
 
 # The maximum amount of time that the rover can run in seconds
+#constants are the directions and the robot. 
 MAX_RUNTIME = 36000
 CURRENT_SCOPE = {}
 cursor = 0
@@ -56,8 +57,10 @@ def get_command(rover_name):
         return True
     return False
 
+"""Rover class is where all the work is done"""
 
 class Rover():
+#intilize the map, memory, position, orientation, and name
 
     def __init__(self, name, the_map):
         for i in range(len(the_map) - 1):
@@ -68,11 +71,17 @@ class Rover():
         self.x, self.y = self.spawn()
         self.orientation = NORTH
 
+#print the global scope with the int values
+
     def print_int(self):
         print(self.global_sco["systemInt"]["value"])
 
+##print the global scope with the bool values
+
     def print_bool(self):
         print(self.global_sco["systemBool"]["value"])
+
+# print the map using for loop to itiratethrouh the whole arrays and print out the map with the position  of the robot and print its coordination 
 
     def print_map(self):
         print("X pos" + str(self.x))
@@ -89,6 +98,8 @@ class Rover():
         "rover": {"value": None, "type": "rover"}
         , "systemInt": {"value": 0, "type": "int"}
         , "systemBool": {"value": False, "type": "bool"}}
+
+#method to start the global scope and gets its values ("rover", "int", "bool") and to get the commands and define the type for those commands
 
     def get_global_value(self, var, inner):
 
@@ -191,6 +202,8 @@ class Rover():
     def set_global_value(self, var, inner, value):
         self.global_sco[var][inner] = value
 
+#the reserved commands "ID's"
+
     def get_keys(self):
         global_sco = [
             "rover"
@@ -216,8 +229,12 @@ class Rover():
 
         return global_sco
 
+#print a message 
+
     def print(self, msg):
         print(f"{self.name}: {msg}")
+
+# parse the commands and excute them
 
     def parse_and_execute_cmd(self, command):
         self.print(f"Running command: {command}")
@@ -232,6 +249,8 @@ class Rover():
         program.check_scope(None, None)
         program.check_semantics()
         program.run()
+
+#while there is no commands print "waiting for commands"
 
     def wait_for_command(self):
         start = time.time()
@@ -250,6 +269,9 @@ class Rover():
                 finally:
                     self.print("Finished running command.\n\n")
 
+#spawn in a random spot. initialize coordinates and set the value found to false until you get coordinates that has ' ' and then set the value true and get out
+#of the loop and set the value 'S' 
+
     def spawn(self):
         # Find an empty spot on the map to spawn the robot
         x, y = 0, 0
@@ -263,6 +285,10 @@ class Rover():
         # Set the robot's starting position
         self.r_map[x][y] = "S"
         return x, y
+
+#move the viechle relative to it's orientation forward, after checking if the viechle can move in that direction. if it's facing north, move one row to 
+# up. if it's facing east, move one column to the right. if it's facing south, move one row down. if it's facing west, move one column to the left
+# note that all the other movements  methods works with the same concept as this one 
 
     def go_up(self):
         canTurn = self.can_go_up()
@@ -320,6 +346,9 @@ class Rover():
         else:
             print("can't move")
 
+# this method do an activityofdigging when a treasure found next to the viechle in anyof the directions. if the viechle finds a treasure 'D', it diggs and place 
+# the position of the treasre with 'T' tomark that it was taken. if there is notreasure, the viechle will send a message that you can't dig here.
+
     def dig(self):
         if self.r_map[self.x - 1][self.y] == 'D':
             print("digging.............")
@@ -340,11 +369,15 @@ class Rover():
         else:
             print("you can't dig here")
 
+# this method shows the draw the map using a 2 for loops. the first one is to delete the previous position of the viechle off the map and then set a new value
+# for the viechle at its position on the map. the second for loop is to print the new map. the method also prints the coordination of the viechle as well as it's
+# orientation 
+
     def info(self):
         for i in range(len(self.r_map)):
             for j in range(len(self.r_map[i])):
                 if self.r_map[i][j] == 'R':
-                    self.r_map[i][j] = ''
+                    self.r_map[i][j] = ' '
 
         self.r_map[self.x][self.y] = robot
         for row in self.r_map:
@@ -360,6 +393,9 @@ class Rover():
             print("WEST")
 
         return self.x, self.y
+
+# this method checks if there is a wall to the right of the viechle based on it's orientation. if there is a wall 'X' it will set the value can turn to false
+# disallwing the method go_right from moving the viechle to the right. the next methods can_go_* works with thesame concept
 
     def can_go_right(self):
         canTurn = False
@@ -390,6 +426,7 @@ class Rover():
         return canTurn
 
     # noinspection PyTypeChecker
+    
     def can_go_left(self):
         canTurn = False
         if self.orientation == NORTH:
@@ -474,6 +511,8 @@ class Rover():
                 self.set_global_value("systemBool", "value", False)
         return canTurn
 
+ # based onthe orientaion of the viechle, set a new value to the orientaion to the right of the original one
+
     def turn_right(self):
 
         if self.orientation == NORTH:
@@ -484,6 +523,8 @@ class Rover():
             self.orientation = WEST
         elif self.orientation == EAST:
             self.orientation = SOUTH
+
+  # based onthe orientaion of the viechle, set a new value to the orientaion to the left of the original one
 
     def turn_left(self):
 
@@ -496,13 +537,19 @@ class Rover():
         elif self.orientation == WEST:
             self.orientation = SOUTH
 
+  # set a value at the robot position and add it to the memory
+
     def set_ground(self):
 
         self.ground_memo[self.x][self.y] = self.get_global_value("systemInt", "value")
 
+ # print all the postions that were set by set_ground
+
     def print_ground(self):
 
         print("ground were set at", self.ground_memo)
+
+# get the last position of the set_ground
 
     def get_ground(self):
 
@@ -585,7 +632,6 @@ class AbstractNode():
     # return the token at the current cursor position. This ROVER_COMMAND["code"] is a list of token that
     # has all the spaces and newlines removed
     def get_token(self):
-        global cursor
         return ROVER_COMMAND["code"][cursor]
 
     # verify if the node passed parses, if yes, the node will be appended to the nodes array containing the
