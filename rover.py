@@ -81,7 +81,7 @@ class Rover():
     def print_bool(self):
         print(self.global_sco["systemBool"]["value"])
 
-# print the map using for loop to itiratethrouh the whole arrays and print out the map with the position  of the robot and print its coordination 
+# print the map using for loop to itirate through the whole arrays and print out the map with the position of the robot and print its coordination 
 
     def print_map(self):
         print("X pos" + str(self.x))
