@@ -585,6 +585,7 @@ class AbstractNode():
     # return the token at the current cursor position. This ROVER_COMMAND["code"] is a list of token that
     # has all the spaces and newlines removed
     def get_token(self):
+        global cursor
         return ROVER_COMMAND["code"][cursor]
 
     # verify if the node passed parses, if yes, the node will be appended to the nodes array containing the
